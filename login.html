@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход | Birds 3</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #000; color: #fff; padding: 2rem; }
+        .container { max-width: 400px; margin: 0 auto; background: #111; padding: 2rem; border-radius: 1rem; border: 2px solid #BB0A30; }
+        h1 { color: #BB0A30; text-align: center; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
+        input { width: 100%; padding: 0.75rem; background: #222; border: 1px solid #444; color: #fff; border-radius: 0.5rem; }
+        button { background: #BB0A30; color: #fff; padding: 0.75rem; border: none; border-radius: 0.5rem; cursor: pointer; width: 100%; font-size: 1rem; }
+        .error { background: rgba(255,0,0,0.2); border: 1px solid #f00; color: #f66; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .back-link { display: block; text-align: center; margin-top: 1rem; color: #BB0A30; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Вход в систему</h1>
+        
+        <?php
+        session_start();
+        require_once 'backend/Database.php';
+        require_once 'backend/Auth.php';
+        
+        $db = Database::getInstance();
+        $pdo = $db->getConnection();
+        $auth = new Auth($pdo);
+        
+        $error = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $user = $auth->login($_POST['login'] ?? '', $_POST['password'] ?? '');
+            if ($user) {
+                header('Location: fallback.php');
+                exit;
+            } else {
+                $error = 'Неверный логин или пароль';
+            }
+        }
+        ?>
+        
+        <?php if ($error): ?>
+            <div class="error">❌ <?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" name="login" required>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" name="password" required>
+            </div>
+            <button type="submit">Войти</button>
+        </form>
+        
+        <a href="index.html" class="back-link">← Вернуться на главную</a>
+    </div>
+</body>
+</html>

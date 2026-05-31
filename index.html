@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birds 3 — Новая часть великой серии</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #BB0A30;
+      --primary-dark: #990000;
+      --dark: #000000;
+      --gray: #333333;
+      --light: #f8f8f8;
+      --white: #ffffff;
+      --transition: all 0.4s ease;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background:#000;
+      color:#fff;
+      line-height:1.6;
+      overflow-x:hidden;
+    }
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* ==================== MOBILE FIRST ==================== */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.94);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      height: 70px;
+      border-bottom: 2px solid var(--primary);
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 100%;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+    .nav-links { display: none; }
+    .burger {
+      cursor: pointer;
+      width: 28px;
+      height: 20px;
+      position: relative;
+    }
+    .burger span {
+      background: #fff;
+      height: 3px;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+    .burger span:nth-child(1) { top: 0; }
+    .burger span:nth-child(2) { top: 8px; }
+    .burger span:nth-child(3) { bottom: 0; }
+    .burger.active span:nth-child(1) { transform: rotate(45deg); top: 8px; }
+    .burger.active span:nth-child(2) { opacity: 0; }
+    .burger.active span:nth-child(3) { transform: rotate(-45deg); bottom: 8px; }
+
+    .mobile-menu {
+      position: fixed;
+      top: 70px;
+      left: -100%;
+      width: 100%;
+      height: calc(100vh - 70px);
+      background: #000;
+      transition: left 0.4s ease;
+      z-index: 999;
+      padding: 30px 0;
+      overflow-y: auto;
+    }
+    .mobile-menu.active { left: 0; }
+    .mobile-menu a {
+      display: block;
+      padding: 18px 24px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .mobile-menu a:hover { color: var(--primary); background: rgba(187,10,48,0.15); }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 70px;
+      overflow: hidden;
+    }
+    .hero-video {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.95));
+      z-index: 2;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      padding: 0 16px;
+    }
+    .hero h1 {
+      font-size: 38px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .hero p {
+      font-size: 18px;
+      margin-bottom: 32px;
+      opacity: 0.9;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px 36px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 17px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 8px 25px rgba(187,10,48,0.4);
+    }
+    .btn:hover {
+      background: #cc0033;
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(187,10,48,0.6);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 50px;
+    }
+    .stat {
+      padding: 24px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat h3 {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    section:not(.hero) { padding: 80px 0; }
+    h2 {
+      font-size: 36px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .models-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .model-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .model-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .model-info {
+      padding: 24px;
+      text-align: center;
+    }
+    .model-info h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .detail-wrapper { position: relative; display: inline-block; }
+    .detail-btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    .tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-15px);
+      background: rgba(17,17,17,0.98);
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--primary);
+      border-radius: 18px;
+      padding: 20px;
+      width: 340px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 20px 50px rgba(187,10,48,0.4);
+      margin-bottom: 20px;
+    }
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 12px solid transparent;
+      border-top-color: var(--primary);
+    }
+    .detail-wrapper:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    .tooltip h4 { font-size: 20px; font-weight: 900; color: var(--primary); text-align: center; margin-bottom: 15px; }
+    .tooltip ul { list-style: none; font-size: 14px; line-height: 1.8; color: #ddd; }
+    .tooltip ul strong { color: #fff; }
+
+    .form-section { background: #111; }
+    form {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.05);
+      padding: 40px 20px;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 16px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+    }
+    button[type="submit"] {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      padding: 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    footer {
+      background: #111;
+      padding: 80px 0 40px;
+      border-top: 2px solid var(--primary);
+      margin-top: 100px;
+    }
+    footer .container > div {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      text-align: center;
+    }
+    footer h3, footer h4 {
+      font-size: 24px;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    /* ПЛАНШЕТ */
+    @media (min-width: 768px) {
+      .hero h1 { font-size: 52px; }
+      .hero p { font-size: 22px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .models-grid { grid-template-columns: repeat(2, 1fr); }
+      h2 { font-size: 42px; }
+      section:not(.hero) { padding: 100px 0; }
+    }
+
+    /* ДЕСКТОП */
+    @media (min-width: 992px) {
+      .nav-links {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+      }
+      .nav-links a {
+        color: #fff;
+        font-weight: 600;
+        font-size: 16px;
+        position: relative;
+      }
+      .nav-links a::after {
+        content: ''; position: absolute; bottom: -8px; left: 0; width: 0; height: 2px;
+        background: var(--primary); transition: var(--transition);
+      }
+      .nav-links a:hover::after { width: 100%; }
+      .burger { display: none; }
+
+      .hero h1 { font-size: 64px; }
+      .hero p { font-size: 24px; }
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 30px; }
+      .stat h3 { font-size: 56px; }
+      .models-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+      .model-card img { height: 220px; }
+
+      footer .container > div {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        text-align: left;
+      }
+      footer .container > div > div:last-child { text-align: right; }
+    }
+
+    @media (min-width: 1200px) {
+      .container { padding: 0 40px; }
+    }
+
+    /* ТВОЯ МОДАЛЬНАЯ ФОРМА — ПОЛНОСТЬЮ КАК БЫЛО */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+    .form-popup {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1001;
+      width: 95%;
+      max-width: 500px;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      border: 2px solid var(--primary);
+    }
+    @media (max-width: 480px) {
+      .form-popup { width: 100%; height: 100%; border-radius: 0; padding: 20px 20px 80px 20px; }
+    }
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    .form-header h2 { color: var(--primary); font-size: 24px; font-weight: 900; }
+    .close-btn {
+      background: none; border: none; font-size: 28px; cursor: pointer; color: #aaa;
+      width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s;
+    }
+    .close-btn:hover { background: rgba(255,255,255,0.1); color:#fff; }
+    .form-content { flex: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; }
+    .form-content::-webkit-scrollbar { width:6px; }
+    .form-content::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); border-radius:3px; }
+    .form-content::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.3); border-radius:3px; }
+    .form-group { margin-bottom:20px; }
+    label { display:block; margin-bottom:8px; font-weight:600; color:#ccc; }
+    .required::after { content:" *"; color:var(--primary); }
+    input[type="text"], input[type="email"], input[type="tel"], textarea {
+      width:100%; padding:12px; background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.2);
+      border-radius:8px; font-size:16px; color:#fff; transition:all 0.3s;
+    }
+    input:focus, textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(187,10,48,0.1); }
+    input.error, textarea.error { border-color:#e74c3c; }
+    .checkbox-group { display:flex; align-items:flex-start; gap:10px; margin:25px 0; }
+    .checkbox-group input { margin-top:3px; transform:scale(1.2); accent-color:var(--primary); }
+    .checkbox-group label { font-weight:normal; font-size:14px; color:#aaa; line-height:1.4; }
+    .privacy-link { color:var(--primary); text-decoration:none; font-weight:600; }
+    .privacy-link:hover { text-decoration:underline; }
+    .submit-btn-desktop {
+      width:100%; background:var(--primary); color:white; border:none; padding:15px;
+      border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer;
+      transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .submit-btn-desktop:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 5px 15px rgba(187,10,48,0.4); }
+    .submit-btn-desktop:disabled { background:#bdc3c7; cursor:not-allowed; }
+    .submit-btn-mobile {
+      display:none; position:fixed; bottom:0; left:0; right:0; width:100%;
+      background:var(--primary); color:white; border:none; padding:20px;
+      font-size:18px; font-weight:bold; cursor:pointer; text-transform:uppercase;
+      letter-spacing:0.5px; z-index:1002; min-height:70px;
+      box-shadow:0 -2px 20px rgba(0,0,0,0.3);
+    }
+    .submit-btn-mobile:active:not(:disabled) { background:#cc0033; }
+    .submit-btn-mobile:disabled { background:#bdc3c7; cursor:not-allowed; }
+    @media (max-width:480px) {
+      .submit-btn-desktop { display:none; }
+      .submit-btn-mobile { display:block; }
+    }
+    .message { padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; font-weight:600; flex-shrink:0; }
+    .success { background:rgba(0,255,0,0.15); color:#0f0; border:1px solid rgba(0,255,0,0.3); }
+    .error { background:rgba(255,0,0,0.15); color:#f66; border:1px solid rgba(255,0,0,0.3); }
+    .hidden { display:none; }
+    .error-message { color:#e74c3c; font-size:12px; margin-top:5px; display:none; }
+    .loading { display:inline-block; width:20px; height:20px; border:3px solid #ffffff; border-top-color:transparent; border-radius:50%; animation:spin 1s ease-in-out infinite; margin-right:10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- ШАПКА -->
+  <header>
+    <nav class="container">
+      <div class="logo">BIRDS</div>
+      <ul class="nav-links">
+        <li><a href="#models">Герои</a></li>
+        <li><a href="#advantages">Преимущества</a></li>
+        <li><a href="#betatest">Бета-тест</a></li>
+        
+      </ul>
+      <button class="btn open-form">Связаться с нами</button>
+      <div class="burger" id="burger">
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+    <ul class="mobile-menu" id="mobileMenu">
+      <li><a href="#models">Модели</a></li>
+      <li><a href="#advantages">Преимущества</a></li>
+      <li><a href="#betatest">Тест-драйв</a></li>
+      
+      <li><a href="#" class="open-form">Связаться с нами</a></li>
+    </ul>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="images/video2.mp4" type="video/mp4">
+      Ваш браузер не поддерживает видео.
+    </video>
+    <div class="container">
+      <div class="hero-content">
+        <h1>Birds 3 — Легенда возвращается</h1>
+        <p>Не просто ярость. Тактика.</p>
+        <button class="btn open-form">Связаться с нами</button>
+        <div class="stats">
+          <div class="stat"><h3>45</h3><p>новых героев</p></div>
+          <div class="stat"><h3>4</h3><p>карты</p></div>
+          <div class="stat"><h3>№1</h3><p>в жанре моба</p></div>
+          <div class="stat"><h3>birds</h3><p>легендарная серия</p></div>
+          <div class="stat"><h3>BrdsFLY</h3><p>новый движок</p></div>
+          <div class="stat"><h3>98%</h3><p>оценка пользователей</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- МОДЕЛИ -->
+  <section id="models">
+    <div class="container">
+      <h2>Встречайте Новых Героев</h2>
+      <div class="models-grid">
+        <div class="model-card">
+          <img src="images/Kalipta.jpg" alt="Kalipta">
+          <div class="model-info">
+            <h3>Колибри</h3>
+            <p>Лучший дамагер на близкой дистанции</p>
+            <div class="detail-wrapper">
+              <button class="detail-btn">Подробнее</button>
+              <div class="tooltip">
+                <h4>Коллибри патч 0.34.2</h4>
+                <ul>
+                  <li><strong>Дистанция атаки:</strong> 20 см.</li>
+                  <li><strong>Выносливость:</strong> 100 ед.</li>
+                  <li><strong>0-100 см/ч:</strong>  2. 5 сек.</li>
+                  <li><strong>Позиция:</strong> Kerry </li>
+                  <li><strong>Win-rate:</strong> 86% </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="model-card">
+          <img src="images/toucan.jpg" alt="Toucan">
+          <div class="model-info">
+            <h3>Тукан</h3>
+            <p>Новый вид экзотических птиц теперь в игре</p>
+            <div class="detail-wrapper">
+              <button class="detail-btn">Подробнее</button>
+              <div class="tooltip">
+                <h4>Тукан особый экзотик</h4>
+                <ul>
+                  <li><strong>Дистанция атаки:</strong> 40 см.</li>
+                  <li><strong>Выносливость:</strong> 200 ед.</li>
+                  <li><strong>0-100 см/ч:</strong>  5 сек.</li>
+                  <li><strong>Позиция:</strong> Гнездо/3 </li>
+                  <li><strong>Win-rate:</strong> 83% </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="model-card">
+          <img src="images/golub.jpg" alt="Golub">
+          <div class="model-info">
+            <h3>Голубь</h3>
+            <p>Всеми любимый герой в новом обличии</p>
+            <div class="detail-wrapper">
+              <button class="detail-btn">Подробнее</button>
+              <div class="tooltip">
+                <h4>Голубь обычный городской</h4>
+                <ul>
+                  <li><strong>Дистанция атаки:</strong> 43-50 см.</li>
+                  <li><strong>Выносливость:</strong> 150 ед.</li>
+                  <li><strong>0-100 см/ч:</strong>  4 сек.</li>
+                  <li><strong>Позиция:</strong> Kerry/3/Гнездо </li>
+                  <li><strong>Win-rate:</strong> 67% </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="model-card">
+          <img src="images/orel.jpg" alt="Orel">
+          <div class="model-info">
+            <h3>Орел</h3>
+            <p>Самый ожидаемый герой снова в деле</p>
+            <div class="detail-wrapper">
+              <button class="detail-btn">Подробнее</button>
+              <div class="tooltip">
+                <h4>Орел горный особый</h4>
+                <ul>
+                  <li><strong>Дистанция атаки:</strong> 100 см.</li>
+                  <li><strong>Выносливость:</strong> 200 ед.</li>
+                  <li><strong>0-100 см/ч:</strong>  9.3 сек.</li>
+                  <li><strong>Позиция:</strong> Kerry </li>
+                  <li><strong>Win-rate:</strong> 78% </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПРЕИМУЩЕСТВА -->
+  <section id="advantages" style="background:#111;">
+    <div class="container">
+      <h2>Новая часть Birds3</h2>
+      <div class="models-grid">
+        <div class="model-card">
+          <div class="model-info" style="padding:40px;">
+            <h3>Жанр</h3>
+            <p>Легендарное противостояние вышло на новый уровень. Это полномасштабная война на карте. Команда на команду.</p>
+          </div>
+        </div>
+        <div class="model-card">
+          <div class="model-info" style="padding:40px;">
+            <h3>Герои</h3>
+            <p>Собирайте стаю, комбинируйте способности и разносите врага в клочья.</p>
+          </div>
+        </div>
+        <div class="model-card">
+          <div class="model-info" style="padding:40px;">
+            <h3>Режимы</h3>
+            <p>Основной тактический режим слишком долго? Новый режим Turbo на 20-30 минут теперь доступен всем.</p>
+          </div>
+        </div>
+        <div class="model-card">
+          <div class="model-info" style="padding:40px;">
+            <h3>Графика</h3>
+            <p>Новый движок BrdsFLY позволил достичь нового уровня графики</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ТЕСТ-ДРАЙВ -->
+  <section id="betatest" class="form-section">
+    <div class="container">
+      <h2>Записаться на бета-тест</h2>
+      <form id="betatestForm">
+        <input type="text" placeholder="Ваше имя" required>
+        <input type="tel" placeholder="+7 (___) ___-__-__" required>
+        <input type="email" placeholder="E-mail" required>
+        <select required>
+          <option value="" disabled selected>Выберите Роль</option>
+          <option>Игрок</option>
+          <option>Модератор</option>
+          <option>Тестер</option>
+          <option>Дизайнер птиц</option>
+          <option>Дизайнер карт</option>
+        </select>
+        <textarea placeholder="Комментарий (по желанию)" rows="4"></textarea>
+        <button type="submit">Записаться на бета-тест</button>
+        <p id="formStatus" style="margin-top:20px; text-align:center; font-weight:600;"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- МОДАЛЬНАЯ ФОРМА -->
+  <div class="overlay" id="overlay">
+    <div class="form-popup">
+      <div class="form-header">
+        <h2>Обратная связь</h2>
+        <button class="close-btn" onclick="closeForm()">×</button>
+      </div>
+      <div id="message" class="message hidden"></div>
+      <div class="form-content">
+        <form id="feedbackForm" novalidate>
+          <div class="form-group">
+            <label for="fullName" class="required">ФИО</label>
+            <input type="text" id="fullName" name="fullName" required>
+            <div class="error-message" id="fullNameError">Пожалуйста, введите ваше ФИО</div>
+          </div>
+          <div class="form-group">
+            <label for="email" class="required">Email</label>
+            <input type="email" id="email" name="email" required>
+            <div class="error-message" id="emailError">Пожалуйста, введите корректный email</div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Телефон</label>
+            <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__">
+            <div class="error-message" id="phoneError">Пожалуйста, введите корректный номер телефона</div>
+          </div>
+          <div class="form-group">
+            <label for="organization">Организация</label>
+            <input type="text" id="organization" name="organization">
+          </div>
+          <div class="form-group">
+            <label for="messageText" class="required">Сообщение</label>
+            <textarea id="messageText" name="message" required placeholder="Расскажите, чем мы можем вам помочь..."></textarea>
+            <div class="error-message" id="messageError">Пожалуйста, введите ваше сообщение</div>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="privacyPolicy" name="privacyPolicy" required>
+            <label for="privacyPolicy">
+              Я согласен с <a href="#" class="privacy-link" onclick="event.preventDefault(); showPrivacyPolicy()">политикой обработки персональных данных</a>
+            </label>
+          </div>
+          <div class="error-message" id="privacyError">Необходимо ваше согласие</div>
+          <button type="submit" class="submit-btn-desktop" id="submitBtnDesktop">
+            <span id="submitTextDesktop">Отправить сообщение</span>
+            <span id="submitLoadingDesktop" class="loading hidden"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+    <button type="submit" class="submit-btn-mobile hidden" id="submitBtnMobile" form="feedbackForm">
+      <span id="submitTextMobile">Отправить сообщение</span>
+      <span id="submitLoadingMobile" class="loading hidden"></span>
+    </button>
+  </div>
+
+  <!-- ФУТЕР -->
+  <footer>
+    <div class="container">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:50px; margin-bottom:60px;">
+        <div>
+          <h3 style="font-size:28px; font-weight:900; color:var(--primary); margin-bottom:20px;">BIRDSGAMES.INC</h3>
+          <p style="color:#aaa; line-height:1.8;">
+            Официальный сайт Birds<br>
+            Проект ООО «BirdsGames»<br>
+            ИНН 23081546967 / ОГРН 12319903042
+          </p>
+        </div>
+        <div>
+          <h4 style="font-size:20px; font-weight:700; color:#fff; margin-bottom:15px;">Контакты</h4>
+          <p style="color:#aaa; line-height:1.9;">
+            <strong>Адрес:</strong> г. Краснодар, ул. Ставропольская, 67<br>
+            <strong>Телефон:</strong> <a href="tel:+79884891976" style="color:var(--primary); text-decoration:none;">+7 (861) 265-80-00</a><br>
+            <strong>E-mail:</strong> info@birds-games.ru
+          </p>
+        </div>
+        <div>
+          <h4 style="font-size:20px; font-weight:700; color:#fff; margin-bottom:15px;">Навигация</h4>
+          <ul style="list-style:none; color:#aaa; line-height:2.2;">
+            <li><a href="#models" style="color:#aaa; text-decoration:none;">Герои</a></li>
+            <li><a href="#advantages" style="color:#aaa; text-decoration:none;">Преимущества</a></li>
+            <li><a href="#betatest" style="color:#aaa; text-decoration:none;">Бета-драйв</a></li>
+            <li><a href="#" class="open-form" style="color:var(--primary); text-decoration:none;">Связаться с нами</a></li>
+          </ul>
+        </div>
+        <div style="text-align:right;">
+          <div style="margin-bottom:30px;">
+            <div class="logo" style="font-size:48px; display:inline-block;">BIRDS</div>
+          </div>
+          <p style="color:#666; font-size:14px;">
+            © 2025 BirdsGames.inc<br>
+            Все права защищены.
+          </p>
+        </div>
+      </div>
+      <div style="text-align:center; padding-top:40px; border-top:1px solid rgba(255,255,255,0.1); color:#666; font-size:13px;">
+        <p>
+          Проект ООО «ПтицыИгра», Краснодар, Россия<br>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ВЕСЬ СКРИПТ -->
+  <script>
+    document.getElementById('burger').addEventListener('click', function() {
+      this.classList.toggle('active');
+      document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    document.getElementById('betatestForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('formStatus').textContent = 'Спасибо! Мы свяжемся с вами в ближайшее время.';
+      document.getElementById('formStatus').style.color = '#00ff00';
+      this.reset();
+    });
+
+    const FORMCARRY_FORM_ID = "jKnCo9CZ4ap";
+    const FORM_URL = `https://formcarry.com/s/${FORMCARRY_FORM_ID}`;
+    const FORM_STORAGE_KEY = 'feedback_form_data';
+    const overlay = document.getElementById('overlay');
+    const form = document.getElementById('feedbackForm');
+    const messageDiv = document.getElementById('message');
+    const submitBtnDesktop = document.getElementById('submitBtnDesktop');
+    const submitBtnMobile = document.getElementById('submitBtnMobile');
+    const submitTextDesktop = document.getElementById('submitTextDesktop');
+    const submitTextMobile = document.getElementById('submitTextMobile');
+    const submitLoadingDesktop = document.getElementById('submitLoadingDesktop');
+    const submitLoadingMobile = document.getElementById('submitLoadingMobile');
+    const phoneInput = document.getElementById('phone');
+    document.querySelectorAll('.open-form').forEach(btn => btn.addEventListener('click', openForm));
+
+    function openForm() {
+      overlay.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      history.pushState({ formOpen: true }, '', '#feedback');
+      toggleSubmitButtons();
+      restoreFormData();
+    }
+    function closeForm() {
+      overlay.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      hideMessage();
+      clearErrors();
+      if (window.location.hash === '#feedback') history.back();
+    }
+    function toggleSubmitButtons() {
+      const isMobile = window.innerWidth <= 480;
+      if (isMobile) {
+        submitBtnMobile.classList.remove('hidden');
+        submitBtnDesktop.style.display = 'none';
+      } else {
+        submitBtnMobile.classList.add('hidden');
+        submitBtnDesktop.style.display = 'block';
+      }
+    }
+    window.addEventListener('resize', toggleSubmitButtons);
+    window.addEventListener('popstate', function(event) {
+      if (overlay.style.display === 'block') closeForm();
+    });
+    function validateForm() {
+      let isValid = true;
+      clearErrors();
+      const fullName = document.getElementById('fullName').value.trim();
+      if (!fullName) { showError('fullNameError', 'Пожалуйста, введите ваше ФИО'); isValid = false; }
+      const email = document.getElementById('email').value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) { showError('emailError', 'Пожалуйста, введите email'); isValid = false; }
+      else if (!emailRegex.test(email)) { showError('emailError', 'Пожалуйста, введите корректный email'); isValid = false; }
+      const phone = phoneInput.value.trim();
+      if (phone && phone !== '+7 (___) ___-__-__') {
+        const cleanPhone = phone.replace(/[^\d+]/g, '');
+        if (cleanPhone.length < 11) { showError('phoneError', 'Номер телефона должен содержать 11 цифр'); isValid = false; }
+      }
+      const message = document.getElementById('messageText').value.trim();
+      if (!message) { showError('messageError', 'Пожалуйста, введите ваше сообщение'); isValid = false; }
+      const privacyPolicy = document.getElementById('privacyPolicy').checked;
+      if (!privacyPolicy) { showError('privacyError', 'Необходимо ваше согласие с политикой обработки данных'); isValid = false; }
+      return isValid;
+    }
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      const inputId = elementId.replace('Error', '');
+      const inputElement = document.getElementById(inputId);
+      if (inputElement) inputElement.classList.add('error');
+    }
+    function clearErrors() {
+      document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error'));
+    }
+    function formatPhoneNumber(value) {
+      let numbers = value.replace(/\D/g, '');
+      if (numbers.startsWith('7') || numbers.startsWith('8')) numbers = '7' + numbers.substring(1);
+      numbers = numbers.substring(0, 11);
+      if (numbers.length === 0) return '';
+      else if (numbers.length <= 1) return '+7';
+      else if (numbers.length <= 4) return `+7 (${numbers.substring(1, 4)}`;
+      else if (numbers.length <= 7) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}`;
+      else if (numbers.length <= 9) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}`;
+      else return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}-${numbers.substring(9, 11)}`;
+    }
+    phoneInput.addEventListener('input', function(e) {
+      const oldValue = e.target.value;
+      const newValue = formatPhoneNumber(oldValue);
+      e.target.value = newValue;
+      saveFormData();
+      if (e.target.classList.contains('error')) {
+        const errorElement = document.getElementById('phoneError');
+        if (errorElement) { errorElement.style.display = 'none'; e.target.classList.remove('error'); }
+      }
+    });
+    function saveFormData() {
+      const formData = {
+        fullName: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        organization: document.getElementById('organization').value,
+        message: document.getElementById('messageText').value,
+        privacyPolicy: document.getElementById('privacyPolicy').checked
+      };
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
+    }
+    function restoreFormData() {
+      const savedData = localStorage.getItem(FORM_STORAGE_KEY);
+      if (savedData) {
+        try {
+          const formData = JSON.parse(savedData);
+          document.getElementById('fullName').value = formData.fullName || '';
+          document.getElementById('email').value = formData.email || '';
+          if (formData.phone && formData.phone !== '+7 (___) ___-__-__') {
+            phoneInput.value = formatPhoneNumber(formData.phone);
+          } else {
+            phoneInput.value = formData.phone || '';
+          }
+          document.getElementById('organization').value = formData.organization || '';
+          document.getElementById('messageText').value = formData.message || '';
+          document.getElementById('privacyPolicy').checked = formData.privacyPolicy || false;
+        } catch (e) { console.error('Ошибка восстановления данных:', e); }
+      }
+    }
+    function clearFormData() {
+      localStorage.removeItem(FORM_STORAGE_KEY);
+      form.reset();
+      clearErrors();
+    }
+    function showMessage(text, type) {
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.classList.remove('hidden');
+      if (type === 'success') setTimeout(hideMessage, 5000);
+    }
+    function hideMessage() { messageDiv.classList.add('hidden'); }
+    function showPrivacyPolicy() {
+      alert('Политика обработки персональных данных\n\nМы обязуемся защищать ваши персональные данные и использовать их только для обработки вашего запроса.');
+    }
+    async function submitForm() {
+      if (!validateForm()) {
+        showMessage('Пожалуйста, исправьте ошибки в форме', 'error');
+        return;
+      }
+      submitBtnDesktop.disabled = true;
+      submitBtnMobile.disabled = true;
+      submitTextDesktop.classList.add('hidden');
+      submitTextMobile.classList.add('hidden');
+      submitLoadingDesktop.classList.remove('hidden');
+      submitLoadingMobile.classList.remove('hidden');
+      hideMessage();
+      try {
+        const formData = new FormData(form);
+        const response = await fetch(FORM_URL, { method: 'POST', body: formData });
+        const result = await response.json();
+        if (response.ok && result.code === 200) {
+          showMessage('Ваше сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.', 'success');
+          clearFormData();
+          setTimeout(() => { closeForm(); }, 3000);
+        } else {
+          throw new Error(result.message || 'Ошибка отправки формы');
+        }
+      } catch (error) {
+        console.error('Ошибка:', error);
+        showMessage('Готово.', 'error');
+      } finally {
+        submitBtnDesktop.disabled = false;
+        submitBtnMobile.disabled = false;
+        submitTextDesktop.classList.remove('hidden');
+        submitTextMobile.classList.remove('hidden');
+        submitLoadingDesktop.classList.add('hidden');
+        submitLoadingMobile.classList.add('hidden');
+      }
+    }
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      submitForm();
+    });
+    form.addEventListener('input', function(event) {
+      if (event.target !== phoneInput) saveFormData();
+      const target = event.target;
+      if (target.classList.contains('error')) {
+        const errorId = target.id + 'Error';
+        const errorElement = document.getElementById(errorId);
+        if (errorElement) { errorElement.style.display = 'none'; target.classList.remove('error'); }
+      }
+    });
+    form.addEventListener('change', function(event) {
+      if (event.target !== phoneInput) saveFormData();
+    });
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeForm();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay.style.display === 'block') closeForm();
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.location.hash === '#feedback') openForm();
+    });
+  </script>
+</body>
+</html>

@@ -1,7 +1,6 @@
 // API endpoints
 const API_BASE = window.location.origin + '/birds/api';
 let currentUser = null;
-const FORM_STORAGE_KEY = 'birds_feedback_form_data';
 
 // Проверка авторизации
 async function checkAuth() {
@@ -11,7 +10,6 @@ async function checkAuth() {
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
         });
-        
         const data = await response.json();
         currentUser = data.success ? data.user : null;
         updateUIBasedOnAuth();
@@ -29,86 +27,121 @@ function updateUIBasedOnAuth() {
     updateAuthButtons();
     if (currentUser) {
         fillFormWithUserData(currentUser);
-    } else {
-        restoreFormData();
     }
 }
 
 // Заполнение формы данными пользователя
 function fillFormWithUserData(user) {
-    document.getElementById('fullName').value = user.fullname || '';
+    document.getElementById('fullname').value = user.fullname || '';
     document.getElementById('email').value = user.email || '';
     document.getElementById('phone').value = user.phone || '';
     document.getElementById('organization').value = user.organization || '';
-    document.getElementById('messageText').value = user.message || '';
-}
-
-// Сохранение в localStorage
-function saveFormDataToLocal() {
-    const formData = {
-        fullName: document.getElementById('fullName').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        organization: document.getElementById('organization').value,
-        message: document.getElementById('messageText').value,
-        privacyPolicy: document.getElementById('privacyPolicy').checked
-    };
-    localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
-}
-
-// Восстановление из localStorage
-function restoreFormData() {
-    const saved = localStorage.getItem(FORM_STORAGE_KEY);
-    if (saved) {
-        const data = JSON.parse(saved);
-        document.getElementById('fullName').value = data.fullName || '';
-        document.getElementById('email').value = data.email || '';
-        document.getElementById('phone').value = data.phone || '';
-        document.getElementById('organization').value = data.organization || '';
-        document.getElementById('messageText').value = data.message || '';
-        document.getElementById('privacyPolicy').checked = data.privacyPolicy || false;
-    }
-}
-
-// Очистка формы
-function clearFormData() {
-    localStorage.removeItem(FORM_STORAGE_KEY);
-    document.getElementById('feedbackForm').reset();
+    document.getElementById('message').value = user.message || '';
 }
 
 // Получение данных формы
 function getFormData() {
     return {
-        fullname: document.getElementById('fullName').value.trim(),
+        fullname: document.getElementById('fullname').value.trim(),
         email: document.getElementById('email').value.trim(),
         phone: document.getElementById('phone').value.trim(),
         organization: document.getElementById('organization').value.trim(),
-        message: document.getElementById('messageText').value.trim(),
-        privacy_policy: document.getElementById('privacyPolicy').checked
+        message: document.getElementById('message').value.trim(),
+        privacy_policy: document.getElementById('privacy').checked
     };
-}
-
-// Показ сообщения
-function showMessage(text, type) {
-    const messageDiv = document.getElementById('message');
-    messageDiv.textContent = text;
-    messageDiv.className = `message ${type}`;
-    messageDiv.classList.remove('hidden');
-    if (type === 'success') setTimeout(() => messageDiv.classList.add('hidden'), 5000);
 }
 
 // Валидация
 function validateForm(formData) {
-    const errors = [];
-    if (!formData.fullname) errors.push('Введите ФИО');
-    if (!formData.email || !formData.email.includes('@')) errors.push('Введите корректный email');
-    if (!formData.message) errors.push('Введите сообщение');
-    if (!formData.privacy_policy) errors.push('Необходимо согласие с политикой обработки данных');
+    const errors = {};
+    if (!formData.fullname) errors.fullname = 'Введите ФИО';
+    if (!formData.email || !formData.email.includes('@')) errors.email = 'Введите корректный email';
+    if (!formData.message) errors.message = 'Введите комментарий';
+    if (!formData.privacy_policy) errors.privacy = 'Необходимо согласие';
     return errors;
 }
 
-// Отправка через API
-async function submitViaAPI(formData, isUpdate = false) {
+// Показ сообщения
+function showMessage(text, type) {
+    const msgDiv = document.getElementById('formMessage');
+    msgDiv.textContent = text;
+    msgDiv.className = `message ${type}`;
+    msgDiv.classList.remove('hidden');
+    setTimeout(() => msgDiv.classList.add('hidden'), 5000);
+}
+
+// Показ ошибок валидации
+function showValidationErrors(errors) {
+    document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error'));
+    
+    for (const [field, message] of Object.entries(errors)) {
+        const errorEl = document.getElementById(`${field}Error`);
+        const inputEl = document.getElementById(field);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+        if (inputEl) inputEl.classList.add('error');
+    }
+}
+
+// Очистка ошибок
+function clearErrors() {
+    document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error'));
+}
+
+// Показ логина и пароляfunction showCredentials(login, password) {
+    const modal = document.createElement('div');
+    modal.className = 'credentials-modal';
+    modal.innerHTML = `
+        <h3>✅ Регистрация успешна!</h3>
+        <p><strong>Логин:</strong></p>
+        <code>${escapeHtml(login)}</code>
+        <p><strong>Пароль:</strong></p>
+        <code>${escapeHtml(password)}</code>
+        <hr>
+        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Сохраните эти данные для входа!</p>
+        <button id="closeCredsModal">Закрыть</button>
+    `;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay-modal';
+    
+    document.body.appendChild(overlay);
+    document.body.appendChild(modal);
+    
+    const close = () => {
+        modal.remove();
+        overlay.remove();
+    };
+    
+    document.getElementById('closeCredsModal').onclick = close;
+    overlay.onclick = close;
+}
+
+// Отправка формы
+async function submitForm() {
+    const formData = getFormData();
+    const errors = validateForm(formData);
+    
+    if (Object.keys(errors).length > 0) {
+        showValidationErrors(errors);
+        return;
+    }
+    
+    clearErrors();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoading = document.getElementById('submitLoading');
+    
+    submitBtn.disabled = true;
+    submitText.classList.add('hidden');
+    submitLoading.classList.remove('hidden');
+    
+    const isUpdate = currentUser !== null;
     let url = `${API_BASE}/applications`;
     let method = 'POST';
     
@@ -130,52 +163,43 @@ async function submitViaAPI(formData, isUpdate = false) {
         if (data.success) {
             if (data.login && data.password) {
                 showCredentials(data.login, data.password);
-            } else {
-                showMessage('✅ Данные успешно отправлены!', 'success');
+                document.getElementById('betaForm').reset();
+            } else if (isUpdate) {
+                showMessage('✅ Данные успешно обновлены!', 'success');
             }
-            clearFormData();
             await checkAuth();
-            return true;
         } else if (data.errors) {
-            const errorMessages = Object.values(data.errors).map(e => e.message);
-            showMessage(errorMessages.join('\n'), 'error');
-            return false;
+            showValidationErrors(data.errors);
+            showMessage('Пожалуйста, исправьте ошибки', 'error');
         } else if (data.error === 'Unauthorized') {
             showMessage('Необходимо авторизоваться', 'warning');
             showLoginForm();
-            return false;
+        } else {
+            showMessage('Ошибка: ' + (data.error || 'Неизвестная ошибка'), 'error');
         }
-        return false;
     } catch (error) {
         showMessage('Ошибка сети: ' + error.message, 'error');
-        return false;
+    } finally {
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        submitLoading.classList.add('hidden');
     }
 }
 
-// Показ логина/пароля
-function showCredentials(login, password) {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        background: #111; padding: 2rem; border-radius: 1rem; z-index: 1001;
-        border: 2px solid #BB0A30; max-width: 400px; width: 90%;
-    `;
-    modal.innerHTML = `
-        <h3 style="color: #BB0A30;">✅ Регистрация успешна!</h3>
-        <p><strong>Логин:</strong> <code>${login}</code></p>
-        <p><strong>Пароль:</strong> <code>${password}</code></p>
-        <hr>
-        <p style="font-size: 0.85rem;">Сохраните эти данные для входа!</p>
-        <button id="closeModalBtn" style="background: #BB0A30; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; cursor: pointer;">Закрыть</button>
-    `;
-    document.body.appendChild(modal);
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.7); z-index: 1000;`;
-    document.body.appendChild(overlay);
-    document.getElementById('closeModalBtn').onclick = () => { modal.remove(); overlay.remove(); };
+// Форматирование телефона
+function formatPhoneNumber(value) {
+    let numbers = value.replace(/\D/g, '');
+    if (numbers.startsWith('7') || numbers.startsWith('8')) numbers = '7' + numbers.substring(1);
+    numbers = numbers.substring(0, 11);
+    if (numbers.length === 0) return '';
+    if (numbers.length <= 1) return '+7';
+    if (numbers.length <= 4) return `+7 (${numbers.substring(1, 4)}`;
+    if (numbers.length <= 7) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}`;
+    if (numbers.length <= 9) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}`;
+    return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}-${numbers.substring(9, 11)}`;
 }
 
-// Авторизация
+// Вход в систему
 async function doLogin(login, password) {
     try {
         const response = await fetch(`${API_BASE}/auth/login`, {
@@ -206,106 +230,115 @@ async function doLogout() {
     currentUser = null;
     updateUIBasedOnAuth();
     showMessage('Вы вышли из системы', 'success');
+    document.getElementById('betaForm').reset();
 }
 
 // Обновление кнопок авторизации
 function updateAuthButtons() {
-    let container = document.getElementById('authButtonsContainer');
-    const footer = document.querySelector('footer .container > div:first-child');
+    const headerAuth = document.getElementById('headerAuth');
+    const footerContainer = document.getElementById('authButtonsContainer');
     
-    if (!container && footer) {
-        container = document.createElement('div');
-        container.id = 'authButtonsContainer';
-        container.style.marginTop = '20px';
-        container.style.display = 'flex';
-        container.style.gap = '1rem';
-        container.style.justifyContent = 'center';
-        footer.appendChild(container);
-    }
-    
-    if (container) {
-        if (currentUser) {
-            container.innerHTML = `
-                <span style="color: #BB0A30; font-weight: bold;">👤 ${currentUser.login || currentUser.fullname}</span>
-                <button id="logoutBtn" style="background: #64748b; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; color: white; cursor: pointer;">🚪 Выйти</button>
-            `;
-            document.getElementById('logoutBtn')?.addEventListener('click', doLogout);
-        } else {
-            container.innerHTML = `<button id="showLoginBtn" style="background: #BB0A30; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; color: white; cursor: pointer;">🔐 Войти</button>`;
-            document.getElementById('showLoginBtn')?.addEventListener('click', showLoginForm);
-        }
+    if (currentUser) {
+        const userHtml = `<span class="user-info">👤 ${escapeHtml(currentUser.login || currentUser.fullname)}</span>`;
+        const logoutBtn = `<button class="auth-btn" id="logoutBtn">🚪 Выйти</button>`;
+        
+        if (headerAuth) headerAuth.innerHTML = userHtml + logoutBtn;
+        if (footerContainer) footerContainer.innerHTML = userHtml + logoutBtn;
+        
+        document.getElementById('logoutBtn')?.addEventListener('click', doLogout);
+    } else {
+        const loginBtn = `<button class="auth-btn" id="showLoginBtn">🔐 Войти</button>`;
+        
+        if (headerAuth) headerAuth.innerHTML = loginBtn;
+        if (footerContainer) footerContainer.innerHTML = loginBtn;
+        
+        document.getElementById('showLoginBtn')?.addEventListener('click', showLoginForm);
     }
 }
 
 // Форма входа
 function showLoginForm() {
     const modal = document.createElement('div');
-    modal.style.cssText = `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 2rem; border-radius: 1rem; z-index: 1001; border: 2px solid #BB0A30; max-width: 350px; width: 90%;`;
+    modal.className = 'credentials-modal';
     modal.innerHTML = `
-        <h3 style="color: #BB0A30; text-align: center;">🔐 Вход</h3>
+        <h3>🔐 Вход в систему</h3>
+        <div id="loginErrorMsg" style="color: #f66; margin-bottom: 1rem; display: none;"></div>
         <input type="text" id="loginInput" placeholder="Логин" style="width: 100%; padding: 0.75rem; margin: 0.5rem 0; background: #222; border: 1px solid #444; color: white; border-radius: 0.5rem;">
         <input type="password" id="passwordInput" placeholder="Пароль" style="width: 100%; padding: 0.75rem; margin: 0.5rem 0; background: #222; border: 1px solid #444; color: white; border-radius: 0.5rem;">
         <button id="loginBtn" style="width: 100%; padding: 0.75rem; background: #BB0A30; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Войти</button>
         <button id="closeLoginBtn" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; background: #444; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
     `;
-    document.body.appendChild(modal);
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.7); z-index: 1000;`;
-    document.body.appendChild(overlay);
     
-    const close = () => { modal.remove(); overlay.remove(); };
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay-modal';
+    
+    document.body.appendChild(overlay);
+    document.body.appendChild(modal);
+    
+    const close = () => {
+        modal.remove();
+        overlay.remove();
+    };
+    
     document.getElementById('closeLoginBtn').onclick = close;
     overlay.onclick = close;
+    
     document.getElementById('loginBtn').onclick = async () => {
-        const success = await doLogin(document.getElementById('loginInput').value, document.getElementById('passwordInput').value);
+        const login = document.getElementById('loginInput').value;
+        const password = document.getElementById('passwordInput').value;
+        const errorMsg = document.getElementById('loginErrorMsg');
+        
+        if (!login || !password) {
+            errorMsg.textContent = 'Введите логин и пароль';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        const success = await doLogin(login, password);
         if (success) close();
     };
 }
 
-// Обработчик формы
-function initFormHandler() {
-    const form = document.getElementById('feedbackForm');
-    if (!form) return;
-    
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = getFormData();
-        const errors = validateForm(formData);
-        if (errors.length > 0) {
-            showMessage(errors.join('\n'), 'error');
-            return;
-        }
-        const isUpdate = currentUser !== null;
-        await submitViaAPI(formData, isUpdate);
+// Escape HTML
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
     });
-    
-    form.addEventListener('input', () => { if (!currentUser) saveFormDataToLocal(); });
-}
-
-// Форматирование телефона
-function formatPhoneNumber(value) {
-    let numbers = value.replace(/\D/g, '');
-    if (numbers.startsWith('7') || numbers.startsWith('8')) numbers = '7' + numbers.substring(1);
-    numbers = numbers.substring(0, 11);
-    if (numbers.length === 0) return '';
-    if (numbers.length <= 1) return '+7';
-    if (numbers.length <= 4) return `+7 (${numbers.substring(1, 4)}`;
-    if (numbers.length <= 7) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}`;
-    if (numbers.length <= 9) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}`;
-    return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}-${numbers.substring(9, 11)}`;
 }
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
+    // Форматирование телефона
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
-        phoneInput.addEventListener('input', (e) => { e.target.value = formatPhoneNumber(e.target.value); });
+        phoneInput.addEventListener('input', (e) => {
+            e.target.value = formatPhoneNumber(e.target.value);
+        });
     }
     
-    await checkAuth();
-    initFormHandler();
+    // Отправка формы
+    const form = document.getElementById('betaForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitForm();
+        });
+    }
     
-    // Слайдер для мобильного меню
+    // Политика конфиденциальности
+    const privacyLink = document.getElementById('privacyLink');
+    if (privacyLink) {
+        privacyLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Политика обработки персональных данных\n\nМы обязуемся защищать ваши персональные данные и использовать их только для обработки вашей заявки на бета-тест.');
+        });
+    }
+    
+    // Мобильное меню
     const burger = document.getElementById('burger');
     const mobileMenu = document.getElementById('mobileMenu');
     if (burger && mobileMenu) {
@@ -315,45 +348,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    // Форма бета-теста (оставляем без изменений)
-    const betaForm = document.getElementById('betatestForm');
-    if (betaForm) {
-        betaForm.addEventListener('submit', (e) => {
+    // Tooltip для карточек
+    document.querySelectorAll('.detail-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const status = document.getElementById('formStatus');
-            if (status) {
-                status.textContent = 'Спасибо! Мы свяжемся с вами в ближайшее время.';
-                status.style.color = '#00ff00';
-            }
-            betaForm.reset();
-        });
-    }
-    
-    // Открытие модальной формы
-    document.querySelectorAll('.open-form').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('overlay').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            restoreFormData();
         });
     });
     
-    // Закрытие формы
-    const closeBtn = document.querySelector('.close-btn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            document.getElementById('overlay').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-    }
-    
-    const overlay = document.getElementById('overlay');
-    if (overlay) {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-    }
+    // Проверка авторизации
+    await checkAuth();
 });

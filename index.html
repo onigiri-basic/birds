@@ -259,7 +259,7 @@
     .tooltip ul strong { color: #fff; }
 
     .form-section { background: #111; }
-    form {
+    .beta-form {
       max-width: 600px;
       margin: 0 auto;
       background: rgba(255,255,255,0.05);
@@ -268,7 +268,7 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.1);
     }
-    input, textarea, select {
+    .beta-form input, .beta-form textarea, .beta-form select {
       width: 100%;
       padding: 16px;
       margin: 10px 0;
@@ -278,7 +278,7 @@
       color: #fff;
       font-family: inherit;
     }
-    button[type="submit"] {
+    .beta-form button {
       width: 100%;
       background: var(--primary);
       color: #fff;
@@ -330,6 +330,7 @@
         color: #fff;
         font-weight: 600;
         font-size: 16px;
+        text-decoration: none;
         position: relative;
       }
       .nav-links a::after {
@@ -357,13 +358,13 @@
       .container { padding: 0 40px; }
     }
 
-    /* ТВОЯ МОДАЛЬНАЯ ФОРМА — ПОЛНОСТЬЮ КАК БЫЛО */
+    /* МОДАЛЬНАЯ ФОРМА */
     .overlay {
       display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.8);
       z-index: 1000;
       backdrop-filter: blur(5px);
     }
@@ -420,34 +421,39 @@
     .checkbox-group label { font-weight:normal; font-size:14px; color:#aaa; line-height:1.4; }
     .privacy-link { color:var(--primary); text-decoration:none; font-weight:600; }
     .privacy-link:hover { text-decoration:underline; }
-    .submit-btn-desktop {
+    .submit-btn {
       width:100%; background:var(--primary); color:white; border:none; padding:15px;
       border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer;
       transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px;
-      display:flex; align-items:center; justify-content:center; gap:10px;
     }
-    .submit-btn-desktop:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 5px 15px rgba(187,10,48,0.4); }
-    .submit-btn-desktop:disabled { background:#bdc3c7; cursor:not-allowed; }
-    .submit-btn-mobile {
-      display:none; position:fixed; bottom:0; left:0; right:0; width:100%;
-      background:var(--primary); color:white; border:none; padding:20px;
-      font-size:18px; font-weight:bold; cursor:pointer; text-transform:uppercase;
-      letter-spacing:0.5px; z-index:1002; min-height:70px;
-      box-shadow:0 -2px 20px rgba(0,0,0,0.3);
-    }
-    .submit-btn-mobile:active:not(:disabled) { background:#cc0033; }
-    .submit-btn-mobile:disabled { background:#bdc3c7; cursor:not-allowed; }
-    @media (max-width:480px) {
-      .submit-btn-desktop { display:none; }
-      .submit-btn-mobile { display:block; }
-    }
+    .submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 5px 15px rgba(187,10,48,0.4); }
+    .submit-btn:disabled { background:#bdc3c7; cursor:not-allowed; }
     .message { padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; font-weight:600; flex-shrink:0; }
     .success { background:rgba(0,255,0,0.15); color:#0f0; border:1px solid rgba(0,255,0,0.3); }
     .error { background:rgba(255,0,0,0.15); color:#f66; border:1px solid rgba(255,0,0,0.3); }
+    .warning { background:rgba(255,255,0,0.15); color:#ff0; border:1px solid rgba(255,255,0,0.3); }
     .hidden { display:none; }
     .error-message { color:#e74c3c; font-size:12px; margin-top:5px; display:none; }
     .loading { display:inline-block; width:20px; height:20px; border:3px solid #ffffff; border-top-color:transparent; border-radius:50%; animation:spin 1s ease-in-out infinite; margin-right:10px; }
     @keyframes spin { to { transform:rotate(360deg); } }
+    
+    .auth-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .auth-btn {
+      background: var(--primary);
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(187,10,48,0.4); }
   </style>
 </head>
 <body>
@@ -460,7 +466,6 @@
         <li><a href="#models">Герои</a></li>
         <li><a href="#advantages">Преимущества</a></li>
         <li><a href="#betatest">Бета-тест</a></li>
-        
       </ul>
       <button class="btn open-form">Связаться с нами</button>
       <div class="burger" id="burger">
@@ -468,10 +473,9 @@
       </div>
     </nav>
     <ul class="mobile-menu" id="mobileMenu">
-      <li><a href="#models">Модели</a></li>
+      <li><a href="#models">Герои</a></li>
       <li><a href="#advantages">Преимущества</a></li>
-      <li><a href="#betatest">Тест-драйв</a></li>
-      
+      <li><a href="#betatest">Бета-тест</a></li>
       <li><a href="#" class="open-form">Связаться с нами</a></li>
     </ul>
   </header>
@@ -512,13 +516,13 @@
             <div class="detail-wrapper">
               <button class="detail-btn">Подробнее</button>
               <div class="tooltip">
-                <h4>Коллибри патч 0.34.2</h4>
+                <h4>Колибри патч 0.34.2</h4>
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 20 см.</li>
                   <li><strong>Выносливость:</strong> 100 ед.</li>
-                  <li><strong>0-100 см/ч:</strong>  2. 5 сек.</li>
-                  <li><strong>Позиция:</strong> Kerry </li>
-                  <li><strong>Win-rate:</strong> 86% </li>
+                  <li><strong>0-100 см/ч:</strong> 2.5 сек.</li>
+                  <li><strong>Позиция:</strong> Керри</li>
+                  <li><strong>Win-rate:</strong> 86%</li>
                 </ul>
               </div>
             </div>
@@ -536,9 +540,9 @@
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 40 см.</li>
                   <li><strong>Выносливость:</strong> 200 ед.</li>
-                  <li><strong>0-100 см/ч:</strong>  5 сек.</li>
-                  <li><strong>Позиция:</strong> Гнездо/3 </li>
-                  <li><strong>Win-rate:</strong> 83% </li>
+                  <li><strong>0-100 см/ч:</strong> 5 сек.</li>
+                  <li><strong>Позиция:</strong> Гнездо/3</li>
+                  <li><strong>Win-rate:</strong> 83%</li>
                 </ul>
               </div>
             </div>
@@ -556,9 +560,9 @@
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 43-50 см.</li>
                   <li><strong>Выносливость:</strong> 150 ед.</li>
-                  <li><strong>0-100 см/ч:</strong>  4 сек.</li>
-                  <li><strong>Позиция:</strong> Kerry/3/Гнездо </li>
-                  <li><strong>Win-rate:</strong> 67% </li>
+                  <li><strong>0-100 см/ч:</strong> 4 сек.</li>
+                  <li><strong>Позиция:</strong> Керри/3/Гнездо</li>
+                  <li><strong>Win-rate:</strong> 67%</li>
                 </ul>
               </div>
             </div>
@@ -576,9 +580,9 @@
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 100 см.</li>
                   <li><strong>Выносливость:</strong> 200 ед.</li>
-                  <li><strong>0-100 см/ч:</strong>  9.3 сек.</li>
-                  <li><strong>Позиция:</strong> Kerry </li>
-                  <li><strong>Win-rate:</strong> 78% </li>
+                  <li><strong>0-100 см/ч:</strong> 9.3 сек.</li>
+                  <li><strong>Позиция:</strong> Керри</li>
+                  <li><strong>Win-rate:</strong> 78%</li>
                 </ul>
               </div>
             </div>
@@ -591,7 +595,7 @@
   <!-- ПРЕИМУЩЕСТВА -->
   <section id="advantages" style="background:#111;">
     <div class="container">
-      <h2>Новая часть Birds3</h2>
+      <h2>Новая часть Birds 3</h2>
       <div class="models-grid">
         <div class="model-card">
           <div class="model-info" style="padding:40px;">
@@ -621,16 +625,16 @@
     </div>
   </section>
 
-  <!-- ТЕСТ-ДРАЙВ -->
+  <!-- БЕТА-ТЕСТ -->
   <section id="betatest" class="form-section">
     <div class="container">
       <h2>Записаться на бета-тест</h2>
-      <form id="betatestForm">
+      <form id="betatestForm" class="beta-form">
         <input type="text" placeholder="Ваше имя" required>
         <input type="tel" placeholder="+7 (___) ___-__-__" required>
         <input type="email" placeholder="E-mail" required>
         <select required>
-          <option value="" disabled selected>Выберите Роль</option>
+          <option value="" disabled selected>Выберите роль</option>
           <option>Игрок</option>
           <option>Модератор</option>
           <option>Тестер</option>
@@ -644,14 +648,14 @@
     </div>
   </section>
 
-  <!-- МОДАЛЬНАЯ ФОРМА -->
+  <!-- МОДАЛЬНАЯ ФОРМА ОБРАТНОЙ СВЯЗИ -->
   <div class="overlay" id="overlay">
     <div class="form-popup">
       <div class="form-header">
         <h2>Обратная связь</h2>
-        <button class="close-btn" onclick="closeForm()">×</button>
+        <button class="close-btn" id="closeFormBtn">×</button>
       </div>
-      <div id="message" class="message hidden"></div>
+      <div id="formMessage" class="message hidden"></div>
       <div class="form-content">
         <form id="feedbackForm" novalidate>
           <div class="form-group">
@@ -681,21 +685,17 @@
           <div class="checkbox-group">
             <input type="checkbox" id="privacyPolicy" name="privacyPolicy" required>
             <label for="privacyPolicy">
-              Я согласен с <a href="#" class="privacy-link" onclick="event.preventDefault(); showPrivacyPolicy()">политикой обработки персональных данных</a>
+              Я согласен с <a href="#" class="privacy-link" id="privacyLink">политикой обработки персональных данных</a>
             </label>
           </div>
           <div class="error-message" id="privacyError">Необходимо ваше согласие</div>
-          <button type="submit" class="submit-btn-desktop" id="submitBtnDesktop">
-            <span id="submitTextDesktop">Отправить сообщение</span>
-            <span id="submitLoadingDesktop" class="loading hidden"></span>
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span id="submitText">Отправить сообщение</span>
+            <span id="submitLoading" class="loading hidden"></span>
           </button>
         </form>
       </div>
     </div>
-    <button type="submit" class="submit-btn-mobile hidden" id="submitBtnMobile" form="feedbackForm">
-      <span id="submitTextMobile">Отправить сообщение</span>
-      <span id="submitLoadingMobile" class="loading hidden"></span>
-    </button>
   </div>
 
   <!-- ФУТЕР -->
@@ -723,7 +723,7 @@
           <ul style="list-style:none; color:#aaa; line-height:2.2;">
             <li><a href="#models" style="color:#aaa; text-decoration:none;">Герои</a></li>
             <li><a href="#advantages" style="color:#aaa; text-decoration:none;">Преимущества</a></li>
-            <li><a href="#betatest" style="color:#aaa; text-decoration:none;">Бета-драйв</a></li>
+            <li><a href="#betatest" style="color:#aaa; text-decoration:none;">Бета-тест</a></li>
             <li><a href="#" class="open-form" style="color:var(--primary); text-decoration:none;">Связаться с нами</a></li>
           </ul>
         </div>
@@ -737,228 +737,14 @@
           </p>
         </div>
       </div>
+      <div id="authButtonsContainer" class="auth-buttons"></div>
       <div style="text-align:center; padding-top:40px; border-top:1px solid rgba(255,255,255,0.1); color:#666; font-size:13px;">
-        <p>
-          Проект ООО «ПтицыИгра», Краснодар, Россия<br>
-        </p>
+        <p>Проект ООО «ПтицыИгра», Краснодар, Россия</p>
       </div>
     </div>
   </footer>
 
-  <!-- ВЕСЬ СКРИПТ -->
-  <script>
-    document.getElementById('burger').addEventListener('click', function() {
-      this.classList.toggle('active');
-      document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    document.getElementById('betatestForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      document.getElementById('formStatus').textContent = 'Спасибо! Мы свяжемся с вами в ближайшее время.';
-      document.getElementById('formStatus').style.color = '#00ff00';
-      this.reset();
-    });
-
-    const FORMCARRY_FORM_ID = "jKnCo9CZ4ap";
-    const FORM_URL = `https://formcarry.com/s/${FORMCARRY_FORM_ID}`;
-    const FORM_STORAGE_KEY = 'feedback_form_data';
-    const overlay = document.getElementById('overlay');
-    const form = document.getElementById('feedbackForm');
-    const messageDiv = document.getElementById('message');
-    const submitBtnDesktop = document.getElementById('submitBtnDesktop');
-    const submitBtnMobile = document.getElementById('submitBtnMobile');
-    const submitTextDesktop = document.getElementById('submitTextDesktop');
-    const submitTextMobile = document.getElementById('submitTextMobile');
-    const submitLoadingDesktop = document.getElementById('submitLoadingDesktop');
-    const submitLoadingMobile = document.getElementById('submitLoadingMobile');
-    const phoneInput = document.getElementById('phone');
-    document.querySelectorAll('.open-form').forEach(btn => btn.addEventListener('click', openForm));
-
-    function openForm() {
-      overlay.style.display = 'block';
-      document.body.style.overflow = 'hidden';
-      history.pushState({ formOpen: true }, '', '#feedback');
-      toggleSubmitButtons();
-      restoreFormData();
-    }
-    function closeForm() {
-      overlay.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      hideMessage();
-      clearErrors();
-      if (window.location.hash === '#feedback') history.back();
-    }
-    function toggleSubmitButtons() {
-      const isMobile = window.innerWidth <= 480;
-      if (isMobile) {
-        submitBtnMobile.classList.remove('hidden');
-        submitBtnDesktop.style.display = 'none';
-      } else {
-        submitBtnMobile.classList.add('hidden');
-        submitBtnDesktop.style.display = 'block';
-      }
-    }
-    window.addEventListener('resize', toggleSubmitButtons);
-    window.addEventListener('popstate', function(event) {
-      if (overlay.style.display === 'block') closeForm();
-    });
-    function validateForm() {
-      let isValid = true;
-      clearErrors();
-      const fullName = document.getElementById('fullName').value.trim();
-      if (!fullName) { showError('fullNameError', 'Пожалуйста, введите ваше ФИО'); isValid = false; }
-      const email = document.getElementById('email').value.trim();
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email) { showError('emailError', 'Пожалуйста, введите email'); isValid = false; }
-      else if (!emailRegex.test(email)) { showError('emailError', 'Пожалуйста, введите корректный email'); isValid = false; }
-      const phone = phoneInput.value.trim();
-      if (phone && phone !== '+7 (___) ___-__-__') {
-        const cleanPhone = phone.replace(/[^\d+]/g, '');
-        if (cleanPhone.length < 11) { showError('phoneError', 'Номер телефона должен содержать 11 цифр'); isValid = false; }
-      }
-      const message = document.getElementById('messageText').value.trim();
-      if (!message) { showError('messageError', 'Пожалуйста, введите ваше сообщение'); isValid = false; }
-      const privacyPolicy = document.getElementById('privacyPolicy').checked;
-      if (!privacyPolicy) { showError('privacyError', 'Необходимо ваше согласие с политикой обработки данных'); isValid = false; }
-      return isValid;
-    }
-    function showError(elementId, message) {
-      const errorElement = document.getElementById(elementId);
-      errorElement.textContent = message;
-      errorElement.style.display = 'block';
-      const inputId = elementId.replace('Error', '');
-      const inputElement = document.getElementById(inputId);
-      if (inputElement) inputElement.classList.add('error');
-    }
-    function clearErrors() {
-      document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error'));
-    }
-    function formatPhoneNumber(value) {
-      let numbers = value.replace(/\D/g, '');
-      if (numbers.startsWith('7') || numbers.startsWith('8')) numbers = '7' + numbers.substring(1);
-      numbers = numbers.substring(0, 11);
-      if (numbers.length === 0) return '';
-      else if (numbers.length <= 1) return '+7';
-      else if (numbers.length <= 4) return `+7 (${numbers.substring(1, 4)}`;
-      else if (numbers.length <= 7) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}`;
-      else if (numbers.length <= 9) return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}`;
-      else return `+7 (${numbers.substring(1, 4)}) ${numbers.substring(4, 7)}-${numbers.substring(7, 9)}-${numbers.substring(9, 11)}`;
-    }
-    phoneInput.addEventListener('input', function(e) {
-      const oldValue = e.target.value;
-      const newValue = formatPhoneNumber(oldValue);
-      e.target.value = newValue;
-      saveFormData();
-      if (e.target.classList.contains('error')) {
-        const errorElement = document.getElementById('phoneError');
-        if (errorElement) { errorElement.style.display = 'none'; e.target.classList.remove('error'); }
-      }
-    });
-    function saveFormData() {
-      const formData = {
-        fullName: document.getElementById('fullName').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        organization: document.getElementById('organization').value,
-        message: document.getElementById('messageText').value,
-        privacyPolicy: document.getElementById('privacyPolicy').checked
-      };
-      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
-    }
-    function restoreFormData() {
-      const savedData = localStorage.getItem(FORM_STORAGE_KEY);
-      if (savedData) {
-        try {
-          const formData = JSON.parse(savedData);
-          document.getElementById('fullName').value = formData.fullName || '';
-          document.getElementById('email').value = formData.email || '';
-          if (formData.phone && formData.phone !== '+7 (___) ___-__-__') {
-            phoneInput.value = formatPhoneNumber(formData.phone);
-          } else {
-            phoneInput.value = formData.phone || '';
-          }
-          document.getElementById('organization').value = formData.organization || '';
-          document.getElementById('messageText').value = formData.message || '';
-          document.getElementById('privacyPolicy').checked = formData.privacyPolicy || false;
-        } catch (e) { console.error('Ошибка восстановления данных:', e); }
-      }
-    }
-    function clearFormData() {
-      localStorage.removeItem(FORM_STORAGE_KEY);
-      form.reset();
-      clearErrors();
-    }
-    function showMessage(text, type) {
-      messageDiv.textContent = text;
-      messageDiv.className = `message ${type}`;
-      messageDiv.classList.remove('hidden');
-      if (type === 'success') setTimeout(hideMessage, 5000);
-    }
-    function hideMessage() { messageDiv.classList.add('hidden'); }
-    function showPrivacyPolicy() {
-      alert('Политика обработки персональных данных\n\nМы обязуемся защищать ваши персональные данные и использовать их только для обработки вашего запроса.');
-    }
-    async function submitForm() {
-      if (!validateForm()) {
-        showMessage('Пожалуйста, исправьте ошибки в форме', 'error');
-        return;
-      }
-      submitBtnDesktop.disabled = true;
-      submitBtnMobile.disabled = true;
-      submitTextDesktop.classList.add('hidden');
-      submitTextMobile.classList.add('hidden');
-      submitLoadingDesktop.classList.remove('hidden');
-      submitLoadingMobile.classList.remove('hidden');
-      hideMessage();
-      try {
-        const formData = new FormData(form);
-        const response = await fetch(FORM_URL, { method: 'POST', body: formData });
-        const result = await response.json();
-        if (response.ok && result.code === 200) {
-          showMessage('Ваше сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.', 'success');
-          clearFormData();
-          setTimeout(() => { closeForm(); }, 3000);
-        } else {
-          throw new Error(result.message || 'Ошибка отправки формы');
-        }
-      } catch (error) {
-        console.error('Ошибка:', error);
-        showMessage('Готово.', 'error');
-      } finally {
-        submitBtnDesktop.disabled = false;
-        submitBtnMobile.disabled = false;
-        submitTextDesktop.classList.remove('hidden');
-        submitTextMobile.classList.remove('hidden');
-        submitLoadingDesktop.classList.add('hidden');
-        submitLoadingMobile.classList.add('hidden');
-      }
-    }
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      submitForm();
-    });
-    form.addEventListener('input', function(event) {
-      if (event.target !== phoneInput) saveFormData();
-      const target = event.target;
-      if (target.classList.contains('error')) {
-        const errorId = target.id + 'Error';
-        const errorElement = document.getElementById(errorId);
-        if (errorElement) { errorElement.style.display = 'none'; target.classList.remove('error'); }
-      }
-    });
-    form.addEventListener('change', function(event) {
-      if (event.target !== phoneInput) saveFormData();
-    });
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay) closeForm();
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && overlay.style.display === 'block') closeForm();
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-      if (window.location.hash === '#feedback') openForm();
-    });
-  </script>
+  <!-- ПОДКЛЮЧЕНИЕ СКРИПТА -->
+  <script src="script.js"></script>
 </body>
 </html>

@@ -5,14 +5,17 @@ let currentUser = null;
 // Проверка авторизации
 async function checkAuth() {
     try {
-        console.log('Checking auth...');
+        console.log('Checking auth at:', `${API_BASE}/auth/check`);
         const response = await fetch(`${API_BASE}/auth/check`, {
             method: 'GET',
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
         });
+        
+        console.log('Auth response status:', response.status);
         const data = await response.json();
-        console.log('Auth response:', data);
+        console.log('Auth response data:', data);
+        
         currentUser = data.success ? data.user : null;
         updateUIBasedOnAuth();
         return currentUser;
@@ -31,7 +34,6 @@ function updateUIBasedOnAuth() {
     const footerAuth = document.getElementById('footerAuth');
     
     if (currentUser) {
-        // Показываем информацию о пользователе и кнопку выхода
         const userDisplay = currentUser.login || currentUser.fullname;
         const authHtml = `
             <span class="user-info">👤 ${escapeHtml(userDisplay)}</span>
@@ -45,21 +47,17 @@ function updateUIBasedOnAuth() {
         if (headerAuth) headerAuth.innerHTML = authHtml;
         if (footerAuth) footerAuth.innerHTML = footerHtml;
         
-        // Добавляем обработчики выхода
         document.getElementById('logoutBtnHeader')?.addEventListener('click', doLogout);
         document.getElementById('logoutBtnFooter')?.addEventListener('click', doLogout);
         
-        // Заполняем форму данными пользователя
         fillFormWithUserData(currentUser);
     } else {
-        // Показываем кнопку входа
         const authHtml = `<button class="auth-btn" id="loginBtnHeader">🔐 Войти</button>`;
         const footerHtml = `<button class="auth-btn" id="loginBtnFooter">🔐 Войти</button>`;
         
         if (headerAuth) headerAuth.innerHTML = authHtml;
         if (footerAuth) footerAuth.innerHTML = footerHtml;
         
-        // Добавляем обработчики входа
         document.getElementById('loginBtnHeader')?.addEventListener('click', showLoginForm);
         document.getElementById('loginBtnFooter')?.addEventListener('click', showLoginForm);
     }
@@ -114,11 +112,9 @@ function showMessage(text, type) {
 
 // Показ ошибок валидации
 function showValidationErrors(errors) {
-    // Скрываем все ошибки
     document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
     document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error'));
     
-    // Показываем ошибки
     for (const [field, message] of Object.entries(errors)) {
         const errorEl = document.getElementById(`${field}Error`);
         const inputEl = document.getElementById(field);
@@ -170,11 +166,16 @@ function showCredentials(login, password) {
 async function submitForm(event) {
     event.preventDefault();
     
+    console.log('Submit form started');
+    
     const formData = getFormData();
+    console.log('Form data:', formData);
+    
     const errors = validateForm(formData);
     
     if (Object.keys(errors).length > 0) {
         showValidationErrors(errors);
+        showMessage('Пожалуйста, исправьте ошибки', 'error');
         return;
     }
     
@@ -182,11 +183,9 @@ async function submitForm(event) {
     
     const submitBtn = document.getElementById('submitBtn');
     const submitText = document.getElementById('submitText');
-    const submitLoading = document.getElementById('submitLoading');
     
     if (submitBtn) submitBtn.disabled = true;
-    if (submitText) submitText.classList.add('hidden');
-    if (submitLoading) submitLoading.classList.remove('hidden');
+    if (submitText) submitText.textContent = 'Отправка...';
     
     const isUpdate = currentUser !== null;
     let url = `${API_BASE}/applications`;
@@ -197,6 +196,8 @@ async function submitForm(event) {
         url = `${API_BASE}/applications/${currentUser.id}`;
     }
     
+    console.log('Sending request to:', url, 'method:', method);
+    
     try {
         const response = await fetch(url, {
             method: method,
@@ -205,18 +206,18 @@ async function submitForm(event) {
             body: JSON.stringify(formData)
         });
         
+        console.log('Response status:', response.status);
+        
         const data = await response.json();
-        console.log('Submit response:', data);
+        console.log('Response data:', data);
         
         if (data.success) {
             if (data.login && data.password) {
-                // Новая регистрация - показываем логин и пароль
                 showCredentials(data.login, data.password);
                 document.getElementById('betaForm').reset();
             } else if (isUpdate) {
                 showMessage('✅ Данные успешно обновлены!', 'success');
             }
-            // Обновляем статус авторизации
             await checkAuth();
         } else if (data.errors) {
             showValidationErrors(data.errors);
@@ -232,8 +233,7 @@ async function submitForm(event) {
         showMessage('Ошибка сети: ' + error.message, 'error');
     } finally {
         if (submitBtn) submitBtn.disabled = false;
-        if (submitText) submitText.classList.remove('hidden');
-        if (submitLoading) submitLoading.classList.add('hidden');
+        if (submitText) submitText.textContent = 'Записаться на бета-тест';
     }
 }
 
@@ -252,6 +252,8 @@ function formatPhoneNumber(value) {
 
 // Вход в систему
 async function doLogin(login, password) {
+    console.log('Attempting login with:', login);
+    
     try {
         const response = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
@@ -259,8 +261,12 @@ async function doLogin(login, password) {
             credentials: 'include',
             body: JSON.stringify({ login, password })
         });
+        
+        console.log('Login response status:', response.status);
+        
         const data = await response.json();
-        console.log('Login response:', data);
+        console.log('Login response data:', data);
+        
         if (data.success) {
             currentUser = data.user;
             updateUIBasedOnAuth();
@@ -272,13 +278,14 @@ async function doLogin(login, password) {
         }
     } catch (error) {
         console.error('Login error:', error);
-        showMessage('Ошибка сети', 'error');
+        showMessage('Ошибка сети: ' + error.message, 'error');
         return false;
     }
 }
 
 // Выход из системы
 async function doLogout() {
+    console.log('Logging out');
     try {
         await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
         currentUser = null;
@@ -333,6 +340,24 @@ function showLoginForm() {
     };
 }
 
+// Тест API при загрузке
+async function testAPI() {
+    try {
+        console.log('Testing API connection...');
+        const response = await fetch(`${API_BASE}/auth/check`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+        console.log('API test response status:', response.status);
+        const text = await response.text();
+        console.log('API test response text:', text.substring(0, 200));
+        return true;
+    } catch (error) {
+        console.error('API test failed:', error);
+        return false;
+    }
+}
+
 // Escape HTML
 function escapeHtml(str) {
     if (!str) return '';
@@ -347,6 +372,10 @@ function escapeHtml(str) {
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM loaded, initializing...');
+    console.log('API_BASE:', API_BASE);
+    
+    // Тестируем API
+    await testAPI();
     
     // Форматирование телефона
     const phoneInput = document.getElementById('phone');
@@ -360,6 +389,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('betaForm');
     if (form) {
         form.addEventListener('submit', submitForm);
+        console.log('Form submit handler attached');
+    } else {
+        console.error('Form with id "betaForm" not found!');
     }
     
     // Политика конфиденциальности
@@ -381,7 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    // Tooltip для карточек (предотвращаем переход)
+    // Tooltip для карточек
     document.querySelectorAll('.detail-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();

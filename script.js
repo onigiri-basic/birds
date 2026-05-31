@@ -5,12 +5,14 @@ let currentUser = null;
 // Проверка авторизации
 async function checkAuth() {
     try {
+        console.log('Checking auth...');
         const response = await fetch(`${API_BASE}/auth/check`, {
             method: 'GET',
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
         });
         const data = await response.json();
+        console.log('Auth response:', data);
         currentUser = data.success ? data.user : null;
         updateUIBasedOnAuth();
         return currentUser;
@@ -22,36 +24,75 @@ async function checkAuth() {
     }
 }
 
-// Обновление UI
+// Обновление UI после авторизации
 function updateUIBasedOnAuth() {
-    updateAuthButtons();
+    console.log('Updating UI, currentUser:', currentUser);
+    const headerAuth = document.getElementById('authSection');
+    const footerAuth = document.getElementById('footerAuth');
+    
     if (currentUser) {
+        // Показываем информацию о пользователе и кнопку выхода
+        const userDisplay = currentUser.login || currentUser.fullname;
+        const authHtml = `
+            <span class="user-info">👤 ${escapeHtml(userDisplay)}</span>
+            <button class="auth-btn" id="logoutBtnHeader">🚪 Выйти</button>
+        `;
+        const footerHtml = `
+            <span class="user-info">👤 ${escapeHtml(userDisplay)}</span>
+            <button class="auth-btn" id="logoutBtnFooter">🚪 Выйти</button>
+        `;
+        
+        if (headerAuth) headerAuth.innerHTML = authHtml;
+        if (footerAuth) footerAuth.innerHTML = footerHtml;
+        
+        // Добавляем обработчики выхода
+        document.getElementById('logoutBtnHeader')?.addEventListener('click', doLogout);
+        document.getElementById('logoutBtnFooter')?.addEventListener('click', doLogout);
+        
+        // Заполняем форму данными пользователя
         fillFormWithUserData(currentUser);
+    } else {
+        // Показываем кнопку входа
+        const authHtml = `<button class="auth-btn" id="loginBtnHeader">🔐 Войти</button>`;
+        const footerHtml = `<button class="auth-btn" id="loginBtnFooter">🔐 Войти</button>`;
+        
+        if (headerAuth) headerAuth.innerHTML = authHtml;
+        if (footerAuth) footerAuth.innerHTML = footerHtml;
+        
+        // Добавляем обработчики входа
+        document.getElementById('loginBtnHeader')?.addEventListener('click', showLoginForm);
+        document.getElementById('loginBtnFooter')?.addEventListener('click', showLoginForm);
     }
 }
 
 // Заполнение формы данными пользователя
 function fillFormWithUserData(user) {
-    document.getElementById('fullname').value = user.fullname || '';
-    document.getElementById('email').value = user.email || '';
-    document.getElementById('phone').value = user.phone || '';
-    document.getElementById('organization').value = user.organization || '';
-    document.getElementById('message').value = user.message || '';
+    const fullnameInput = document.getElementById('fullname');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const organizationInput = document.getElementById('organization');
+    const messageInput = document.getElementById('message');
+    
+    if (fullnameInput) fullnameInput.value = user.fullname || '';
+    if (emailInput) emailInput.value = user.email || '';
+    if (phoneInput) phoneInput.value = user.phone || '';
+    if (organizationInput) organizationInput.value = user.organization || '';
+    if (messageInput) messageInput.value = user.message || '';
 }
 
 // Получение данных формы
 function getFormData() {
     return {
-        fullname: document.getElementById('fullname').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        organization: document.getElementById('organization').value.trim(),
-        message: document.getElementById('message').value.trim(),
-        privacy_policy: document.getElementById('privacy').checked
+        fullname: document.getElementById('fullname')?.value.trim() || '',
+        email: document.getElementById('email')?.value.trim() || '',
+        phone: document.getElementById('phone')?.value.trim() || '',
+        organization: document.getElementById('organization')?.value.trim() || '',
+        message: document.getElementById('message')?.value.trim() || '',
+        privacy_policy: document.getElementById('privacy')?.checked || false
     };
 }
 
-// Валидация
+// Валидация формы
 function validateForm(formData) {
     const errors = {};
     if (!formData.fullname) errors.fullname = 'Введите ФИО';
@@ -64,6 +105,7 @@ function validateForm(formData) {
 // Показ сообщения
 function showMessage(text, type) {
     const msgDiv = document.getElementById('formMessage');
+    if (!msgDiv) return;
     msgDiv.textContent = text;
     msgDiv.className = `message ${type}`;
     msgDiv.classList.remove('hidden');
@@ -72,9 +114,11 @@ function showMessage(text, type) {
 
 // Показ ошибок валидации
 function showValidationErrors(errors) {
+    // Скрываем все ошибки
     document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
     document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error'));
     
+    // Показываем ошибки
     for (const [field, message] of Object.entries(errors)) {
         const errorEl = document.getElementById(`${field}Error`);
         const inputEl = document.getElementById(field);
@@ -92,22 +136,23 @@ function clearErrors() {
     document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('error'));
 }
 
-// Показ логина и пароляfunction showCredentials(login, password) {
+// Показ логина и пароля после регистрации
+function showCredentials(login, password) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    
     const modal = document.createElement('div');
-    modal.className = 'credentials-modal';
+    modal.className = 'modal-window';
     modal.innerHTML = `
         <h3>✅ Регистрация успешна!</h3>
-        <p><strong>Логин:</strong></p>
+        <p><strong>Ваш логин:</strong></p>
         <code>${escapeHtml(login)}</code>
-        <p><strong>Пароль:</strong></p>
+        <p><strong>Ваш пароль:</strong></p>
         <code>${escapeHtml(password)}</code>
-        <hr>
-        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Сохраните эти данные для входа!</p>
-        <button id="closeCredsModal">Закрыть</button>
+        <hr style="margin: 15px 0; border-color: #333;">
+        <p style="font-size: 0.85rem; margin-bottom: 10px;">Сохраните эти данные для входа в систему!</p>
+        <button id="closeModalBtn">Закрыть</button>
     `;
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay-modal';
     
     document.body.appendChild(overlay);
     document.body.appendChild(modal);
@@ -117,12 +162,14 @@ function clearErrors() {
         overlay.remove();
     };
     
-    document.getElementById('closeCredsModal').onclick = close;
+    document.getElementById('closeModalBtn').onclick = close;
     overlay.onclick = close;
 }
 
 // Отправка формы
-async function submitForm() {
+async function submitForm(event) {
+    event.preventDefault();
+    
     const formData = getFormData();
     const errors = validateForm(formData);
     
@@ -137,9 +184,9 @@ async function submitForm() {
     const submitText = document.getElementById('submitText');
     const submitLoading = document.getElementById('submitLoading');
     
-    submitBtn.disabled = true;
-    submitText.classList.add('hidden');
-    submitLoading.classList.remove('hidden');
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitText) submitText.classList.add('hidden');
+    if (submitLoading) submitLoading.classList.remove('hidden');
     
     const isUpdate = currentUser !== null;
     let url = `${API_BASE}/applications`;
@@ -159,14 +206,17 @@ async function submitForm() {
         });
         
         const data = await response.json();
+        console.log('Submit response:', data);
         
         if (data.success) {
             if (data.login && data.password) {
+                // Новая регистрация - показываем логин и пароль
                 showCredentials(data.login, data.password);
                 document.getElementById('betaForm').reset();
             } else if (isUpdate) {
                 showMessage('✅ Данные успешно обновлены!', 'success');
             }
+            // Обновляем статус авторизации
             await checkAuth();
         } else if (data.errors) {
             showValidationErrors(data.errors);
@@ -178,11 +228,12 @@ async function submitForm() {
             showMessage('Ошибка: ' + (data.error || 'Неизвестная ошибка'), 'error');
         }
     } catch (error) {
+        console.error('Submit error:', error);
         showMessage('Ошибка сети: ' + error.message, 'error');
     } finally {
-        submitBtn.disabled = false;
-        submitText.classList.remove('hidden');
-        submitLoading.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.classList.remove('hidden');
+        if (submitLoading) submitLoading.classList.add('hidden');
     }
 }
 
@@ -209,6 +260,7 @@ async function doLogin(login, password) {
             body: JSON.stringify({ login, password })
         });
         const data = await response.json();
+        console.log('Login response:', data);
         if (data.success) {
             currentUser = data.user;
             updateUIBasedOnAuth();
@@ -219,58 +271,40 @@ async function doLogin(login, password) {
             return false;
         }
     } catch (error) {
+        console.error('Login error:', error);
         showMessage('Ошибка сети', 'error');
         return false;
     }
 }
 
-// Выход
+// Выход из системы
 async function doLogout() {
-    await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
-    currentUser = null;
-    updateUIBasedOnAuth();
-    showMessage('Вы вышли из системы', 'success');
-    document.getElementById('betaForm').reset();
-}
-
-// Обновление кнопок авторизации
-function updateAuthButtons() {
-    const headerAuth = document.getElementById('headerAuth');
-    const footerContainer = document.getElementById('authButtonsContainer');
-    
-    if (currentUser) {
-        const userHtml = `<span class="user-info">👤 ${escapeHtml(currentUser.login || currentUser.fullname)}</span>`;
-        const logoutBtn = `<button class="auth-btn" id="logoutBtn">🚪 Выйти</button>`;
-        
-        if (headerAuth) headerAuth.innerHTML = userHtml + logoutBtn;
-        if (footerContainer) footerContainer.innerHTML = userHtml + logoutBtn;
-        
-        document.getElementById('logoutBtn')?.addEventListener('click', doLogout);
-    } else {
-        const loginBtn = `<button class="auth-btn" id="showLoginBtn">🔐 Войти</button>`;
-        
-        if (headerAuth) headerAuth.innerHTML = loginBtn;
-        if (footerContainer) footerContainer.innerHTML = loginBtn;
-        
-        document.getElementById('showLoginBtn')?.addEventListener('click', showLoginForm);
+    try {
+        await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
+        currentUser = null;
+        updateUIBasedOnAuth();
+        showMessage('Вы вышли из системы', 'success');
+        document.getElementById('betaForm')?.reset();
+    } catch (error) {
+        console.error('Logout error:', error);
     }
 }
 
-// Форма входа
+// Показ формы входа
 function showLoginForm() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    
     const modal = document.createElement('div');
-    modal.className = 'credentials-modal';
+    modal.className = 'modal-window';
     modal.innerHTML = `
         <h3>🔐 Вход в систему</h3>
-        <div id="loginErrorMsg" style="color: #f66; margin-bottom: 1rem; display: none;"></div>
-        <input type="text" id="loginInput" placeholder="Логин" style="width: 100%; padding: 0.75rem; margin: 0.5rem 0; background: #222; border: 1px solid #444; color: white; border-radius: 0.5rem;">
-        <input type="password" id="passwordInput" placeholder="Пароль" style="width: 100%; padding: 0.75rem; margin: 0.5rem 0; background: #222; border: 1px solid #444; color: white; border-radius: 0.5rem;">
-        <button id="loginBtn" style="width: 100%; padding: 0.75rem; background: #BB0A30; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Войти</button>
-        <button id="closeLoginBtn" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; background: #444; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
+        <div id="loginErrorMsg" style="color: #f66; margin-bottom: 10px; display: none;"></div>
+        <input type="text" id="loginInput" placeholder="Логин">
+        <input type="password" id="passwordInput" placeholder="Пароль">
+        <button id="loginSubmitBtn">Войти</button>
+        <button id="closeLoginBtn" class="secondary">Отмена</button>
     `;
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay-modal';
     
     document.body.appendChild(overlay);
     document.body.appendChild(modal);
@@ -283,8 +317,8 @@ function showLoginForm() {
     document.getElementById('closeLoginBtn').onclick = close;
     overlay.onclick = close;
     
-    document.getElementById('loginBtn').onclick = async () => {
-        const login = document.getElementById('loginInput').value;
+    document.getElementById('loginSubmitBtn').onclick = async () => {
+        const login = document.getElementById('loginInput').value.trim();
         const password = document.getElementById('passwordInput').value;
         const errorMsg = document.getElementById('loginErrorMsg');
         
@@ -310,8 +344,10 @@ function escapeHtml(str) {
     });
 }
 
-// Инициализация
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, initializing...');
+    
     // Форматирование телефона
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
@@ -323,10 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Отправка формы
     const form = document.getElementById('betaForm');
     if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await submitForm();
-        });
+        form.addEventListener('submit', submitForm);
     }
     
     // Политика конфиденциальности
@@ -348,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    // Tooltip для карточек
+    // Tooltip для карточек (предотвращаем переход)
     document.querySelectorAll('.detail-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -357,4 +390,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Проверка авторизации
     await checkAuth();
+    
+    console.log('Initialization complete');
 });

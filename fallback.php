@@ -1,5 +1,7 @@
 <?php
 session_start();
+error_log("Fallback.php - session_id: " . session_id());
+error_log("Fallback.php - session data: " . print_r($_SESSION, true));
 require_once 'backend/Database.php';
 require_once 'backend/Validator.php';
 require_once 'backend/Auth.php';

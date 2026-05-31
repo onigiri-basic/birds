@@ -41,6 +41,7 @@ class Auth {
         $stmt = $this->pdo->prepare("UPDATE applications SET user_id = :user_id WHERE id = :id");
         $stmt->execute([':user_id' => $userId, ':id' => $applicationId]);
         
+        // Автоматически авторизуем пользователя
         $_SESSION['user_id'] = $userId;
         $_SESSION['application_id'] = $applicationId;
         $_SESSION['user_login'] = $login;
@@ -64,6 +65,8 @@ class Auth {
             $_SESSION['application_id'] = $user['application_id'];
             $_SESSION['user_login'] = $user['login'];
             
+            error_log("User logged in: " . $user['login'] . ", session_id: " . session_id());
+            
             return [
                 'id' => $user['application_id'],
                 'fullname' => $user['fullname'],
@@ -78,7 +81,9 @@ class Auth {
     }
     
     public function isAuthenticated() {
-        return isset($_SESSION['user_id']) && isset($_SESSION['application_id']);
+        $result = isset($_SESSION['user_id']) && isset($_SESSION['application_id']);
+        error_log("isAuthenticated: " . ($result ? 'true' : 'false') . ", session_id: " . session_id());
+        return $result;
     }
     
     public function getCurrentUser() {
@@ -93,11 +98,22 @@ class Auth {
             WHERE a.id = :id
         ");
         $stmt->execute([':id' => $_SESSION['application_id']]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        error_log("getCurrentUser: " . json_encode($user));
+        return $user;
     }
     
     public function logout() {
+        $_SESSION = array();
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
         session_destroy();
+        error_log("User logged out, session destroyed");
         return true;
     }
 }

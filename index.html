@@ -263,20 +263,69 @@
       max-width: 600px;
       margin: 0 auto;
       background: rgba(255,255,255,0.05);
-      padding: 40px 20px;
+      padding: 40px 30px;
       border-radius: 16px;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .beta-form input, .beta-form textarea, .beta-form select {
+    .beta-form .form-group {
+      margin-bottom: 20px;
+    }
+    .beta-form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #ccc;
+    }
+    .beta-form .required::after {
+      content: " *";
+      color: var(--primary);
+    }
+    .beta-form input, .beta-form textarea {
       width: 100%;
       padding: 16px;
-      margin: 10px 0;
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 8px;
       color: #fff;
       font-family: inherit;
+      font-size: 16px;
+    }
+    .beta-form input:focus, .beta-form textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .beta-form input.error, .beta-form textarea.error {
+      border-color: #e74c3c;
+    }
+    .beta-form .error-message {
+      color: #e74c3c;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 25px 0;
+    }
+    .checkbox-group input {
+      width: auto;
+      margin-top: 3px;
+      transform: scale(1.2);
+      accent-color: var(--primary);
+    }
+    .checkbox-group label {
+      font-weight: normal;
+      font-size: 14px;
+      color: #aaa;
+      line-height: 1.4;
+      margin: 0;
+    }
+    .privacy-link {
+      color: var(--primary);
+      text-decoration: none;
     }
     .beta-form button {
       width: 100%;
@@ -289,6 +338,15 @@
       font-weight: 700;
       cursor: pointer;
       margin-top: 20px;
+      transition: all 0.3s;
+    }
+    .beta-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(187,10,48,0.4);
+    }
+    .beta-form button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     footer {
@@ -358,85 +416,92 @@
       .container { padding: 0 40px; }
     }
 
-    /* МОДАЛЬНАЯ ФОРМА */
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      z-index: 1000;
-      backdrop-filter: blur(5px);
+    /* СООБЩЕНИЯ */
+    .message {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
     }
-    .form-popup {
+    .message.success {
+      background: rgba(0,255,0,0.15);
+      color: #0f0;
+      border: 1px solid rgba(0,255,0,0.3);
+    }
+    .message.error {
+      background: rgba(255,0,0,0.15);
+      color: #f66;
+      border: 1px solid rgba(255,0,0,0.3);
+    }
+    .message.warning {
+      background: rgba(255,255,0,0.15);
+      color: #ff0;
+      border: 1px solid rgba(255,255,0,0.3);
+    }
+    .hidden { display: none; }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* МОДАЛЬНОЕ ОКНО ДЛЯ ЛОГИНА/ПАРОЛЯ */
+    .credentials-modal {
       position: fixed;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
       background: #111;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      padding: 2rem;
+      border-radius: 1rem;
       z-index: 1001;
-      width: 95%;
-      max-width: 500px;
-      max-height: 95vh;
-      display: flex;
-      flex-direction: column;
       border: 2px solid var(--primary);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
     }
-    @media (max-width: 480px) {
-      .form-popup { width: 100%; height: 100%; border-radius: 0; padding: 20px 20px 80px 20px; }
+    .credentials-modal h3 {
+      color: var(--primary);
+      margin-bottom: 1rem;
     }
-    .form-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid rgba(255,255,255,0.1);
-      flex-shrink: 0;
+    .credentials-modal code {
+      display: block;
+      background: #222;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+      word-break: break-all;
+      font-size: 1.1rem;
     }
-    .form-header h2 { color: var(--primary); font-size: 24px; font-weight: 900; }
-    .close-btn {
-      background: none; border: none; font-size: 28px; cursor: pointer; color: #aaa;
-      width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      transition: background 0.3s;
+    .credentials-modal button {
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-top: 1rem;
     }
-    .close-btn:hover { background: rgba(255,255,255,0.1); color:#fff; }
-    .form-content { flex: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; }
-    .form-content::-webkit-scrollbar { width:6px; }
-    .form-content::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); border-radius:3px; }
-    .form-content::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.3); border-radius:3px; }
-    .form-group { margin-bottom:20px; }
-    label { display:block; margin-bottom:8px; font-weight:600; color:#ccc; }
-    .required::after { content:" *"; color:var(--primary); }
-    input[type="text"], input[type="email"], input[type="tel"], textarea {
-      width:100%; padding:12px; background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.2);
-      border-radius:8px; font-size:16px; color:#fff; transition:all 0.3s;
+    .overlay-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
     }
-    input:focus, textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(187,10,48,0.1); }
-    input.error, textarea.error { border-color:#e74c3c; }
-    .checkbox-group { display:flex; align-items:flex-start; gap:10px; margin:25px 0; }
-    .checkbox-group input { margin-top:3px; transform:scale(1.2); accent-color:var(--primary); }
-    .checkbox-group label { font-weight:normal; font-size:14px; color:#aaa; line-height:1.4; }
-    .privacy-link { color:var(--primary); text-decoration:none; font-weight:600; }
-    .privacy-link:hover { text-decoration:underline; }
-    .submit-btn {
-      width:100%; background:var(--primary); color:white; border:none; padding:15px;
-      border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer;
-      transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px;
-    }
-    .submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 5px 15px rgba(187,10,48,0.4); }
-    .submit-btn:disabled { background:#bdc3c7; cursor:not-allowed; }
-    .message { padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; font-weight:600; flex-shrink:0; }
-    .success { background:rgba(0,255,0,0.15); color:#0f0; border:1px solid rgba(0,255,0,0.3); }
-    .error { background:rgba(255,0,0,0.15); color:#f66; border:1px solid rgba(255,0,0,0.3); }
-    .warning { background:rgba(255,255,0,0.15); color:#ff0; border:1px solid rgba(255,255,0,0.3); }
-    .hidden { display:none; }
-    .error-message { color:#e74c3c; font-size:12px; margin-top:5px; display:none; }
-    .loading { display:inline-block; width:20px; height:20px; border:3px solid #ffffff; border-top-color:transparent; border-radius:50%; animation:spin 1s ease-in-out infinite; margin-right:10px; }
-    @keyframes spin { to { transform:rotate(360deg); } }
     
+    /* КНОПКИ АВТОРИЗАЦИИ */
     .auth-buttons {
       margin-top: 20px;
       display: flex;
@@ -453,7 +518,17 @@
       font-weight: 600;
       transition: all 0.3s;
     }
-    .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(187,10,48,0.4); }
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(187,10,48,0.4);
+    }
+    .user-info {
+      color: var(--primary);
+      font-weight: bold;
+      padding: 8px 15px;
+      background: rgba(187,10,48,0.2);
+      border-radius: 50px;
+    }
   </style>
 </head>
 <body>
@@ -467,7 +542,7 @@
         <li><a href="#advantages">Преимущества</a></li>
         <li><a href="#betatest">Бета-тест</a></li>
       </ul>
-      <button class="btn open-form">Связаться с нами</button>
+      <div id="headerAuth"></div>
       <div class="burger" id="burger">
         <span></span><span></span><span></span>
       </div>
@@ -476,7 +551,6 @@
       <li><a href="#models">Герои</a></li>
       <li><a href="#advantages">Преимущества</a></li>
       <li><a href="#betatest">Бета-тест</a></li>
-      <li><a href="#" class="open-form">Связаться с нами</a></li>
     </ul>
   </header>
 
@@ -490,7 +564,6 @@
       <div class="hero-content">
         <h1>Birds 3 — Легенда возвращается</h1>
         <p>Не просто ярость. Тактика.</p>
-        <button class="btn open-form">Связаться с нами</button>
         <div class="stats">
           <div class="stat"><h3>45</h3><p>новых героев</p></div>
           <div class="stat"><h3>4</h3><p>карты</p></div>
@@ -625,78 +698,57 @@
     </div>
   </section>
 
-  <!-- БЕТА-ТЕСТ -->
+  <!-- БЕТА-ТЕСТ (ОСНОВНАЯ ФОРМА) -->
   <section id="betatest" class="form-section">
     <div class="container">
       <h2>Записаться на бета-тест</h2>
-      <form id="betatestForm" class="beta-form">
-        <input type="text" placeholder="Ваше имя" required>
-        <input type="tel" placeholder="+7 (___) ___-__-__" required>
-        <input type="email" placeholder="E-mail" required>
-        <select required>
-          <option value="" disabled selected>Выберите роль</option>
-          <option>Игрок</option>
-          <option>Модератор</option>
-          <option>Тестер</option>
-          <option>Дизайнер птиц</option>
-          <option>Дизайнер карт</option>
-        </select>
-        <textarea placeholder="Комментарий (по желанию)" rows="4"></textarea>
-        <button type="submit">Записаться на бета-тест</button>
-        <p id="formStatus" style="margin-top:20px; text-align:center; font-weight:600;"></p>
+      <form id="betaForm" class="beta-form">
+        <div id="formMessage" class="message hidden"></div>
+        
+        <div class="form-group">
+          <label for="fullname" class="required">ФИО</label>
+          <input type="text" id="fullname" name="fullname" required>
+          <div class="error-message" id="fullnameError">Пожалуйста, введите ваше ФИО</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email" class="required">Email</label>
+          <input type="email" id="email" name="email" required>
+          <div class="error-message" id="emailError">Пожалуйста, введите корректный email</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="phone">Телефон</label>
+          <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__">
+          <div class="error-message" id="phoneError">Пожалуйста, введите корректный номер телефона</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="organization">Организация</label>
+          <input type="text" id="organization" name="organization">
+        </div>
+        
+        <div class="form-group">
+          <label for="message" class="required">Комментарий</label>
+          <textarea id="message" name="message" rows="4" required placeholder="Расскажите о себе и почему хотите участвовать в бета-тесте..."></textarea>
+          <div class="error-message" id="messageError">Пожалуйста, введите комментарий</div>
+        </div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="privacy" name="privacy" required>
+          <label for="privacy">
+            Я согласен с <a href="#" class="privacy-link" id="privacyLink">политикой обработки персональных данных</a>
+          </label>
+        </div>
+        <div class="error-message" id="privacyError">Необходимо ваше согласие</div>
+        
+        <button type="submit" id="submitBtn">
+          <span id="submitText">Записаться на бета-тест</span>
+          <span id="submitLoading" class="loading hidden"></span>
+        </button>
       </form>
     </div>
   </section>
-
-  <!-- МОДАЛЬНАЯ ФОРМА ОБРАТНОЙ СВЯЗИ -->
-  <div class="overlay" id="overlay">
-    <div class="form-popup">
-      <div class="form-header">
-        <h2>Обратная связь</h2>
-        <button class="close-btn" id="closeFormBtn">×</button>
-      </div>
-      <div id="formMessage" class="message hidden"></div>
-      <div class="form-content">
-        <form id="feedbackForm" novalidate>
-          <div class="form-group">
-            <label for="fullName" class="required">ФИО</label>
-            <input type="text" id="fullName" name="fullName" required>
-            <div class="error-message" id="fullNameError">Пожалуйста, введите ваше ФИО</div>
-          </div>
-          <div class="form-group">
-            <label for="email" class="required">Email</label>
-            <input type="email" id="email" name="email" required>
-            <div class="error-message" id="emailError">Пожалуйста, введите корректный email</div>
-          </div>
-          <div class="form-group">
-            <label for="phone">Телефон</label>
-            <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__">
-            <div class="error-message" id="phoneError">Пожалуйста, введите корректный номер телефона</div>
-          </div>
-          <div class="form-group">
-            <label for="organization">Организация</label>
-            <input type="text" id="organization" name="organization">
-          </div>
-          <div class="form-group">
-            <label for="messageText" class="required">Сообщение</label>
-            <textarea id="messageText" name="message" required placeholder="Расскажите, чем мы можем вам помочь..."></textarea>
-            <div class="error-message" id="messageError">Пожалуйста, введите ваше сообщение</div>
-          </div>
-          <div class="checkbox-group">
-            <input type="checkbox" id="privacyPolicy" name="privacyPolicy" required>
-            <label for="privacyPolicy">
-              Я согласен с <a href="#" class="privacy-link" id="privacyLink">политикой обработки персональных данных</a>
-            </label>
-          </div>
-          <div class="error-message" id="privacyError">Необходимо ваше согласие</div>
-          <button type="submit" class="submit-btn" id="submitBtn">
-            <span id="submitText">Отправить сообщение</span>
-            <span id="submitLoading" class="loading hidden"></span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
 
   <!-- ФУТЕР -->
   <footer>
@@ -724,7 +776,6 @@
             <li><a href="#models" style="color:#aaa; text-decoration:none;">Герои</a></li>
             <li><a href="#advantages" style="color:#aaa; text-decoration:none;">Преимущества</a></li>
             <li><a href="#betatest" style="color:#aaa; text-decoration:none;">Бета-тест</a></li>
-            <li><a href="#" class="open-form" style="color:var(--primary); text-decoration:none;">Связаться с нами</a></li>
           </ul>
         </div>
         <div style="text-align:right;">

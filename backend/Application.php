@@ -64,8 +64,8 @@ class Application {
             
         } catch (Exception $e) {
             $this->pdo->rollBack();
-            error_log('Database error: ' . $e->getMessage());
-            return ['success' => false, 'error' => 'Database error'];
+            error_log('Database error in create: ' . $e->getMessage());
+            return ['success' => false, 'error' => 'Database error: ' . $e->getMessage()];
         }
     }
     
@@ -116,7 +116,7 @@ class Application {
             return ['success' => true, 'id' => $id];
             
         } catch (PDOException $e) {
-            error_log('Database error: ' . $e->getMessage());
+            error_log('Database error in update: ' . $e->getMessage());
             return ['success' => false, 'error' => 'Database error'];
         }
     }

@@ -137,23 +137,6 @@
       margin-bottom: 32px;
       opacity: 0.9;
     }
-    .btn {
-      background: var(--primary);
-      color: #fff;
-      padding: 16px 36px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 17px;
-      border: none;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 8px 25px rgba(187,10,48,0.4);
-    }
-    .btn:hover {
-      background: #cc0033;
-      transform: translateY(-4px);
-      box-shadow: 0 15px 35px rgba(187,10,48,0.6);
-    }
 
     .stats {
       display: grid;
@@ -454,8 +437,17 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    /* МОДАЛЬНОЕ ОКНО ДЛЯ ЛОГИНА/ПАРОЛЯ */
-    .credentials-modal {
+    /* МОДАЛЬНЫЕ ОКНА */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+    }
+    .modal-window {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -469,11 +461,11 @@
       width: 90%;
       text-align: center;
     }
-    .credentials-modal h3 {
+    .modal-window h3 {
       color: var(--primary);
       margin-bottom: 1rem;
     }
-    .credentials-modal code {
+    .modal-window code {
       display: block;
       background: #222;
       padding: 0.5rem;
@@ -482,31 +474,34 @@
       word-break: break-all;
       font-size: 1.1rem;
     }
-    .credentials-modal button {
+    .modal-window input {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      background: #222;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 0.5rem;
+    }
+    .modal-window button {
       background: var(--primary);
       color: white;
-      padding: 0.5rem 1rem;
+      padding: 0.75rem;
       border: none;
       border-radius: 0.5rem;
       cursor: pointer;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
+      width: 100%;
     }
-    .overlay-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 1000;
+    .modal-window button.secondary {
+      background: #444;
     }
     
     /* КНОПКИ АВТОРИЗАЦИИ */
-    .auth-buttons {
-      margin-top: 20px;
+    .auth-section {
       display: flex;
-      gap: 1rem;
-      justify-content: center;
+      align-items: center;
+      gap: 15px;
     }
     .auth-btn {
       background: var(--primary);
@@ -516,6 +511,7 @@
       border-radius: 50px;
       cursor: pointer;
       font-weight: 600;
+      font-size: 14px;
       transition: all 0.3s;
     }
     .auth-btn:hover {
@@ -528,6 +524,15 @@
       padding: 8px 15px;
       background: rgba(187,10,48,0.2);
       border-radius: 50px;
+      font-size: 14px;
+    }
+    .footer-auth {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: center;
+      gap: 15px;
     }
   </style>
 </head>
@@ -542,7 +547,7 @@
         <li><a href="#advantages">Преимущества</a></li>
         <li><a href="#betatest">Бета-тест</a></li>
       </ul>
-      <div id="headerAuth"></div>
+      <div class="auth-section" id="authSection"></div>
       <div class="burger" id="burger">
         <span></span><span></span><span></span>
       </div>
@@ -558,7 +563,6 @@
   <section class="hero">
     <video class="hero-video" autoplay muted loop playsinline>
       <source src="images/video2.mp4" type="video/mp4">
-      Ваш браузер не поддерживает видео.
     </video>
     <div class="container">
       <div class="hero-content">
@@ -593,7 +597,7 @@
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 20 см.</li>
                   <li><strong>Выносливость:</strong> 100 ед.</li>
-                  <li><strong>0-100 см/ч:</strong> 2.5 сек.</li>
+                  <li><strong>0-100 км/ч:</strong> 2.5 сек.</li>
                   <li><strong>Позиция:</strong> Керри</li>
                   <li><strong>Win-rate:</strong> 86%</li>
                 </ul>
@@ -613,7 +617,7 @@
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 40 см.</li>
                   <li><strong>Выносливость:</strong> 200 ед.</li>
-                  <li><strong>0-100 см/ч:</strong> 5 сек.</li>
+                  <li><strong>0-100 км/ч:</strong> 5 сек.</li>
                   <li><strong>Позиция:</strong> Гнездо/3</li>
                   <li><strong>Win-rate:</strong> 83%</li>
                 </ul>
@@ -633,7 +637,7 @@
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 43-50 см.</li>
                   <li><strong>Выносливость:</strong> 150 ед.</li>
-                  <li><strong>0-100 см/ч:</strong> 4 сек.</li>
+                  <li><strong>0-100 км/ч:</strong> 4 сек.</li>
                   <li><strong>Позиция:</strong> Керри/3/Гнездо</li>
                   <li><strong>Win-rate:</strong> 67%</li>
                 </ul>
@@ -653,7 +657,7 @@
                 <ul>
                   <li><strong>Дистанция атаки:</strong> 100 см.</li>
                   <li><strong>Выносливость:</strong> 200 ед.</li>
-                  <li><strong>0-100 см/ч:</strong> 9.3 сек.</li>
+                  <li><strong>0-100 км/ч:</strong> 9.3 сек.</li>
                   <li><strong>Позиция:</strong> Керри</li>
                   <li><strong>Win-rate:</strong> 78%</li>
                 </ul>
@@ -698,7 +702,7 @@
     </div>
   </section>
 
-  <!-- БЕТА-ТЕСТ (ОСНОВНАЯ ФОРМА) -->
+  <!-- БЕТА-ТЕСТ ФОРМА -->
   <section id="betatest" class="form-section">
     <div class="container">
       <h2>Записаться на бета-тест</h2>
@@ -788,14 +792,10 @@
           </p>
         </div>
       </div>
-      <div id="authButtonsContainer" class="auth-buttons"></div>
-      <div style="text-align:center; padding-top:40px; border-top:1px solid rgba(255,255,255,0.1); color:#666; font-size:13px;">
-        <p>Проект ООО «ПтицыИгра», Краснодар, Россия</p>
-      </div>
+      <div class="footer-auth" id="footerAuth"></div>
     </div>
   </footer>
 
-  <!-- ПОДКЛЮЧЕНИЕ СКРИПТА -->
   <script src="script.js"></script>
 </body>
 </html>
